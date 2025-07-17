@@ -6,11 +6,11 @@
 **Project:** Cultural Discovery Game - Interactive Cultural Knowledge Platform
 
 ### Team Members
-- **B. Khushal Prasad** - Full Stack Developer & UI/UX Designer
-- **P. Laxmikanth Reddy** - Backend Developer & Data Analytics
-- **N. Yashwanth Reddy** - Frontend Developer & User Experience
-- **M. Manoj** - System Architecture & Database Design
-- **T. Sai Rohit** - DevOps & Deployment Specialist
+- **B. Khushal Prasad** - Full Stack Developer
+- **P. Laxmikanth Reddy** - Backend Developer 
+- **N. Yashwanth Reddy** - Frontend Developer 
+- **M. Manoj** - System Architecture 
+- **T. Sai Rohit** - Data analytics
 
 ---
 
