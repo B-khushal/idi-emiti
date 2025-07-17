@@ -1,8 +1,4 @@
-Understood. I will update the `README.md` file to include the details about the data collected from users: geolocation, user details, category of corpus, title, and description of the input data.
 
-Here's the updated `README.md` file:
-
-````markdown
 # Cultural Discovery Game 🇮🇳✨ - ఇది ఏమిటి? (What's This?)
 
 > **An Interactive Cultural Discovery Game** > _Preserving heritage through play, one object at a time._
