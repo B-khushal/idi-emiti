@@ -6,7 +6,7 @@
 **Project:** Cultural Discovery Game - Interactive Cultural Knowledge Platform
 
 ### Team Members
-- **B. Khushal Prasad** - Project Lead
+- **B. Khushal Prasad** - Project Lead & Manager
 - **P. Laxmikanth Reddy** - Backend Developer 
 - **N. Yashwanth Reddy** - Frontend Developer 
 - **M. Manoj** - System Architecture 
