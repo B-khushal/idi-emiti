@@ -3,7 +3,9 @@
 ## Team Details
 
 **Team Name:** Neuronova  
-**Project:** Cultural Discovery Game - Interactive Cultural Knowledge Platform
+**Project Name:** ఇది ఏమిటి? (What's This?)
+
+**Cultural Discovery Game - Interactive Cultural Knowledge Platform**
 
 ### Team Members
 - **B. Khushal Prasad** - Project Lead & Manager
