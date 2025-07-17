@@ -52,7 +52,7 @@ A **gamified cultural experience** designed to **preserve, educate, and celebrat
 ## 🧩 Key Features
 
 ### 👨‍👩‍👧 For Users:
-- 🖼️ **Image-Based Guessing Game**
+- 🖼️ **Picure-Based Guessing Game**
 - 🌐 **Multi-language Interface**
 - 💬 **Community Contributions**
 - ⚡ **Instant Feedback & Results**
