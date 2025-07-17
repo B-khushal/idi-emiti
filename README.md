@@ -1,4 +1,4 @@
-# 🌍 Cultural Discovery Game
+# 🌍 ఇది ఏమిటి? (What's This?)
 
 ## Team Details
 
