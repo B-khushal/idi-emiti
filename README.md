@@ -13,7 +13,7 @@
 | **P. Laxmikanth Reddy**   | Backend Developer           |
 | **N. Yashwanth Reddy**    | Frontend Developer          |
 | **M. Manoj**              | System Architect            |
-| **T. Sai Rohit**          | Data Analytics              |
+| **T. Sai Rohith**          | Data Analytics              |
 
 ---
 
