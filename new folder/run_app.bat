@@ -1,0 +1,9 @@
+@echo off
+echo Starting "ఇది ఏమిటి? (What's This?)" Application...
+echo.
+echo Installing dependencies...
+pip install -r requirements.txt
+echo.
+echo Starting Streamlit application...
+streamlit run app.py
+pause 
