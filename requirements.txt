@@ -1,11 +1,43 @@
 streamlit
+- Purpose: Main web app framework
+- Usage: Create UI components (st.image, st.text_input, st.button)
+
 pandas
+- Purpose: Data manipulation and analysis
+- Usage: Read/write CSVs, manage user responses data
+
 numpy
+- Purpose: Numerical computing with arrays
+- Usage: Backend calculations, random shuffling of images
+
 Pillow
+- Purpose: Image processing (PIL fork)
+- Usage: Open, resize, and display images in Streamlit
+
 streamlit-authenticator
+- Purpose: Secure authentication system
+- Usage: Implement admin login for dashboard access
+
 plotly
+- Purpose: Interactive data visualizations
+- Usage: Display graphs and charts in analytics dashboard
+
 matplotlib
+- Purpose: Static plotting library
+- Usage: Create basic graphs for data analysis
+
 opencv-python
+- Purpose: Computer vision library (OpenCV)
+- Usage: Future ML integration for image recognition
+
 scikit-learn
+- Purpose: Machine learning library
+- Usage: Build models for cultural object classification
+
 seaborn
+- Purpose: Statistical data visualization
+- Usage: Generate advanced plots and heatmaps
+
 requests
+- Purpose: HTTP requests library
+- Usage: Fetch data from external APIs or image sources
