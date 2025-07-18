@@ -1,0 +1,11 @@
+streamlit
+pandas
+numpy
+Pillow
+streamlit-authenticator
+plotly
+matplotlib
+opencv-python
+scikit-learn
+seaborn
+requests
