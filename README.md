@@ -111,6 +111,8 @@ All collected data is stored securely and handled with strict adherence to priva
 
 ---
 ## Project Structure
+
+```
 Idi-Emiti/
 ├── data/                    # Placeholder for CSVs or initial database files (e.g., cultural_data.csv)
 ├── PROJECT_ROADMAP.md       # Our project development roadmap 
@@ -134,3 +136,5 @@ Idi-Emiti/
 ├── CHANGELOG.md             # Record of all notable changes (details below)
 ├── requirements.txt         # Python dependencies
 └── config.py                # Configuration settings (e.g., database credentials, storage paths)
+
+```
