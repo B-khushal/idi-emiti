@@ -1,67 +1,13 @@
-# Contributing to Cultural Corpus Collection Platform
+The Team Neuronova has been instrumental in laying the foundational groundwork for the Cultural Corpus Collection Platform. Each member brings unique expertise that has been critical in shaping the project from its initial concept to its current prototype phase, and in planning for its future development.
 
-We welcome contributions from everyone interested in helping us build a rich and diverse cultural corpus! Your efforts will help preserve traditional knowledge and advance AI and linguistic research.
+B. Khushal Prasad, as the Project Lead & Manager, has been guiding the overall direction of the project. Khushal has overseen the initial project setup, including the creation of essential documentation like the README.md, CONTRIBUTING.md, and LICENSE files. They are responsible for coordinating the team's efforts, ensuring alignment with the refined project vision, and planning the strategic roadmap for future phases, including key integration sprints and deployment considerations.
 
-Please take a moment to review this document to understand how you can contribute.
+P. Laxmikanth Reddy, our Backend Developer, is focused on building the robust server-side infrastructure. Laxmikanth has been deeply involved in translating the refined data requirements into a detailed MySQL database schema, which is crucial for handling multimodal data. Their upcoming work includes implementing the core database tables and developing the necessary APIs for data ingestion and management, ensuring the backend can securely store and retrieve all cultural item details and media.
 
-## How Can I Contribute?
+N. Yashwanth Reddy, the Frontend Developer, is responsible for crafting the user-facing experience. Yashwanth has developed the basic Streamlit prototype, providing an initial interface for data submission. Their ongoing efforts are centered on enhancing this prototype to support multimodal file uploads and precise geolocation input, and they are also tasked with implementing Progressive Web App (PWA) features to give the application an accessible, mobile-friendly feel.
 
-### 1. Data Submission (As a Cultural Contributor)
+M. Manoj, serving as the System Architect, designs the overarching technical blueprint of the platform. Manoj has played a key role in defining the detailed database schema and is now focused on designing a scalable cloud storage strategy for the multimodal media files. Their architectural planning extends to outlining initial AI integration points and recommending suitable cloud AI services, ensuring the system is built for future intelligent capabilities.
 
-The primary way to contribute is by submitting images and associated metadata of cultural artifacts through our web platform.
+T. Sai Rohith, our Data Analytics Engineer, is dedicated to ensuring the quality and integrity of the collected data, and preparing it for advanced analysis. Sai Rohith's initial contributions involve defining and implementing server-side data validation rules for incoming submissions. They are also responsible for researching and prototyping the necessary data preparation steps for feeding audio and visual content into AI models, laying the groundwork for automated data enrichment.
 
-* **Access the Platform:** [Link to your platform's data submission page]
-* **Prepare Your Data:**
-    * **Image File:** High-quality image of the cultural item.
-    * **Geolocation:** Approximate location (city/state/district) of the item's origin.
-    * **Corpus Category:** Classify the item (e.g., "Household Object," "Festival Artifact").
-    * **Title:** A concise, descriptive name.
-    * **Description:** Detailed explanation in multiple regional Indian languages (if possible), providing context, usage, and significance.
-* **Follow the Structured Flow:** The platform will guide you through the submission process.
-* **Privacy:** All collected data is handled with strict adherence to privacy guidelines. Contributor details may be optionally tracked for acknowledgment.
-
-### 2. Code Contributions (For Developers)
-
-If you're a developer and want to contribute to the platform's codebase, here's how:
-
-#### Reporting Bugs 🐛
-
-* Before submitting a new bug report, please check existing issues to see if the bug has already been reported.
-* If not, open a new issue and provide a clear, concise description of the bug, including:
-    * Steps to reproduce the bug.
-    * Expected behavior.
-    * Actual behavior.
-    * Screenshots (if applicable).
-    * Your operating system and browser.
-
-#### Suggesting Enhancements ✨
-
-* We're open to ideas for new features or improvements.
-* Open a new issue to propose an enhancement. Clearly describe the feature, why it's needed, and how it would benefit the platform.
-
-#### Submitting Pull Requests (PRs) 🚀
-
-1.  **Fork the repository.**
-2.  **Clone your forked repository** to your local machine.
-3.  **Create a new branch** for your feature or bug fix: `git checkout -b feature/your-feature-name` or `bugfix/your-bug-fix-name`.
-4.  **Make your changes.** Ensure your code adheres to our coding standards (if any are defined later).
-5.  **Write clear, concise commit messages.**
-6.  **Push your branch** to your forked repository.
-7.  **Open a Pull Request** to the `main` branch of the original repository.
-8.  **Provide a detailed description** of your changes in the PR.
-9.  **Link to any relevant issues** you are addressing.
-
-**Tech Stack:**
-* **Frontend:** Streamlit, HTML/CSS, JavaScript
-* **Backend:** Python 3.8+, Pandas, CSV (with future scalability to databases like SQLite/PostgreSQL)
-
-### 3. Documentation Improvements 📚
-
-* Spot a typo? Unclear explanation? Missing information? Feel free to suggest improvements to our README or any other documentation files.
-* You can open an issue or directly submit a pull request with your suggested changes.
-
-## Code of Conduct
-
-Please note that this project is released with a [Contributor Code of Conduct](link-to-your-code-of-conduct-if-you-create-one). By participating in this project, you agree to abide by its terms.
-
-Thank you for contributing!
+Together, Team Neuronova is committed to systematically building a platform that will not only collect but also preserve and make accessible the rich tapestry of regional Indian cultural heritage.
