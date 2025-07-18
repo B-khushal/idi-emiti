@@ -24,21 +24,8 @@ def ensure_auth_directories():
 def get_auth_db():
     """Get database instance for authentication - returns None if MySQL not available"""
     try:
-        from database import DatabaseManager
-        from db_config import DB_CONFIG_ENV
-        
-        db_manager = DatabaseManager(
-            host=DB_CONFIG_ENV['host'],
-            user=DB_CONFIG_ENV['user'],
-            password=DB_CONFIG_ENV['password'],
-            database=DB_CONFIG_ENV['database']
-        )
-        
-        if db_manager.connect():
-            from database import CulturalCorpusDB
-            return CulturalCorpusDB(db_manager)
-        else:
-            return None
+        from database import get_database
+        return get_database()
     except Exception as e:
         print(f"MySQL not available, using JSON fallback: {e}")
         return None

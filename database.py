@@ -1,6 +1,7 @@
 """
 Database module for Cultural Corpus Collection Platform
 Handles MySQL database operations and connection management
+Optimized for Streamlit Cloud deployment
 """
 
 import mysql.connector
@@ -15,6 +16,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Check if we're running on Streamlit Cloud
+IS_STREAMLIT_CLOUD = os.getenv('STREAMLIT_SERVER_PORT') is not None
+
 class DatabaseManager:
     """Manages MySQL database connections and operations"""
     
@@ -28,6 +32,11 @@ class DatabaseManager:
     def connect(self) -> bool:
         """Establish database connection"""
         try:
+            # On Streamlit Cloud, we might not have MySQL available
+            if IS_STREAMLIT_CLOUD and not self.password:
+                logger.warning("MySQL not configured on Streamlit Cloud - using JSON fallback")
+                return False
+                
             self.connection = mysql.connector.connect(
                 host=self.host,
                 user=self.user,
@@ -41,6 +50,9 @@ class DatabaseManager:
             return True
         except Error as e:
             logger.error(f"Error connecting to database: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error connecting to database: {e}")
             return False
     
     def disconnect(self):
@@ -64,6 +76,9 @@ class DatabaseManager:
         except Error as e:
             logger.error(f"Error executing query: {e}")
             return None
+        except Exception as e:
+            logger.error(f"Unexpected error executing query: {e}")
+            return None
     
     def execute_update(self, query: str, params: tuple = None) -> bool:
         """Execute an INSERT, UPDATE, or DELETE query"""
@@ -79,6 +94,9 @@ class DatabaseManager:
         except Error as e:
             logger.error(f"Error executing update: {e}")
             return False
+        except Exception as e:
+            logger.error(f"Unexpected error executing update: {e}")
+            return False
     
     def get_last_insert_id(self) -> Optional[int]:
         """Get the last inserted ID"""
@@ -90,6 +108,9 @@ class DatabaseManager:
             return result[0] if result else None
         except Error as e:
             logger.error(f"Error getting last insert ID: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error getting last insert ID: {e}")
             return None
 
 class CulturalCorpusDB:
@@ -441,17 +462,35 @@ def initialize_database(db_manager: DatabaseManager) -> bool:
 _db_manager = None
 _db = None
 
-def get_database() -> CulturalCorpusDB:
-    """Get global database instance"""
+def get_database() -> Optional[CulturalCorpusDB]:
+    """Get global database instance - returns None if MySQL not available"""
     global _db_manager, _db
     
     if _db is None:
-        # Initialize database connection
-        _db_manager = DatabaseManager()
-        if _db_manager.connect():
-            _db = CulturalCorpusDB(_db_manager)
-        else:
-            raise Exception("Failed to connect to database")
+        try:
+            # Try to initialize database connection
+            from db_config import get_database_config, is_mysql_available
+            
+            if is_mysql_available():
+                config = get_database_config()
+                _db_manager = DatabaseManager(
+                    host=config['host'],
+                    user=config['user'],
+                    password=config['password'],
+                    database=config['database']
+                )
+                if _db_manager.connect():
+                    _db = CulturalCorpusDB(_db_manager)
+                    logger.info("MySQL database connection established")
+                else:
+                    logger.warning("MySQL connection failed - using JSON fallback")
+                    return None
+            else:
+                logger.info("MySQL not available - using JSON fallback")
+                return None
+        except Exception as e:
+            logger.warning(f"Database initialization failed - using JSON fallback: {e}")
+            return None
     
     return _db
 
@@ -459,4 +498,5 @@ def close_database():
     """Close global database connection"""
     global _db_manager
     if _db_manager:
-        _db_manager.disconnect() 
+        _db_manager.disconnect()
+        _db_manager = None 

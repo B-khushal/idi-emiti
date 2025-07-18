@@ -1,3 +1,4 @@
+import streamlit as st
 import os
 import pandas as pd
 import random
@@ -720,3 +721,66 @@ def get_idi_emiti_analytics():
         return ensure_json_serializable(result)
     except:
         return {} 
+
+def get_storage_status():
+    """Get current storage mode status for display"""
+    try:
+        from db_config import get_storage_mode, is_mysql_available
+        
+        if is_mysql_available():
+            return {
+                'mode': 'mysql',
+                'status': 'Connected to MySQL Database',
+                'icon': '🗄️',
+                'color': 'success'
+            }
+        else:
+            return {
+                'mode': 'json',
+                'status': 'Using Local JSON Storage',
+                'icon': '📁',
+                'color': 'info'
+            }
+    except Exception:
+        return {
+            'mode': 'json',
+            'status': 'Using Local JSON Storage',
+            'icon': '📁',
+            'color': 'info'
+        }
+
+def display_storage_status():
+    """Display storage status in the app"""
+    try:
+        from language_manager import get_text
+        status = get_storage_status()
+        
+        if status['mode'] == 'mysql':
+            st.success(f"{status['icon']} {get_text('connected_to_mysql')}")
+        else:
+            st.info(f"{status['icon']} {get_text('using_local_storage')}")
+            
+            # Show MySQL setup instructions for local development
+            if not os.getenv('STREAMLIT_SERVER_PORT'):  # Not on Streamlit Cloud
+                with st.expander(f"💡 {get_text('mysql_setup_guide')}"):
+                    st.markdown(get_text('mysql_setup_instructions'))
+    except ImportError:
+        # Fallback if language manager not available
+        status = get_storage_status()
+        if status['mode'] == 'mysql':
+            st.success(f"{status['icon']} {status['status']}")
+        else:
+            st.info(f"{status['icon']} {status['status']}")
+            
+            if not os.getenv('STREAMLIT_SERVER_PORT'):
+                with st.expander("💡 Want to use MySQL database?"):
+                    st.markdown("""
+                    **To enable MySQL database storage:**
+                    
+                    1. **Install MySQL Server** on your local machine
+                    2. **Create database:** `cultural_corpus_platform`
+                    3. **Update credentials** in `db_config.py`
+                    4. **Run migration:** `python migrate_to_mysql.py`
+                    
+                    The app will automatically detect and use MySQL when available.
+                    """) 

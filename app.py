@@ -22,7 +22,16 @@ from utils import (
     get_idi_emiti_count,
     get_idi_emiti_languages,
     get_user_idi_emiti_count,
-    get_idi_emiti_analytics
+    get_idi_emiti_analytics,
+    display_storage_status
+)
+from language_manager import (
+    initialize_language_session,
+    render_language_selector,
+    get_text,
+    get_translated_categories,
+    get_translated_placeholders,
+    render_language_banner
 )
 from audio_recorder import audio_recorder_component, reset_audio_recorder
 from config import (
@@ -429,6 +438,9 @@ def main():
     # Initialize session state
     initialize_session_state()
     
+    # Initialize language support
+    initialize_language_session()
+    
     # Check user authentication
     user = check_user_authentication()
     
@@ -468,6 +480,10 @@ def main():
     
     # Sidebar for navigation
     with st.sidebar:
+        # Language selector
+        render_language_selector()
+        st.markdown("---")
+        
         st.title("🏛️ Navigation")
         
         # Show user info if logged in
@@ -566,10 +582,10 @@ def cultural_corpus_page(user=None):
         return
     
     # Hero Section
-    st.markdown("""
+    st.markdown(f"""
     <div class="hero-section">
-        <h1 class="hero-title">🏛️ Cultural Corpus Collection Platform</h1>
-        <p class="hero-subtitle">Preserving cultural heritage through multimodal data collection</p>
+        <h1 class="hero-title">🏛️ {get_text('app_title')}</h1>
+        <p class="hero-subtitle">{get_text('app_description')}</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -580,8 +596,8 @@ def cultural_corpus_page(user=None):
         """, unsafe_allow_html=True)
         
         # Media Upload Section
-        st.markdown("### 📁 Upload Cultural Media")
-        st.markdown("Share images, audio recordings, or videos of cultural objects, traditions, or practices.")
+        st.markdown(f"### 📁 {get_text('upload_cultural_media')}")
+        st.markdown(f"Share images, audio recordings, or videos of cultural objects, traditions, or practices.")
         
         # Media type selection
         media_type_options = {
@@ -634,7 +650,7 @@ def cultural_corpus_page(user=None):
             
             # Display media preview
             media_type = get_media_type(uploaded_file.name)
-            st.markdown(f"### 📺 {MEDIA_TYPES.get(media_type, 'Media')} Preview")
+            st.markdown(f"### 📺 {get_text('media_preview')}")
             
             if media_type == "image":
                 st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
@@ -644,34 +660,36 @@ def cultural_corpus_page(user=None):
                 st.video(uploaded_file)
             
             # Collection Form
-            st.markdown("### 📝 Cultural Information")
+            st.markdown(f"### 📝 {get_text('cultural_information')}")
             
             with st.form("cultural_data_form"):
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    title = st.text_input("Title", placeholder=TITLE_PLACEHOLDER, help="Give your cultural object a descriptive title")
+                    placeholders = get_translated_placeholders()
+                    title = st.text_input(get_text('title'), placeholder=placeholders['title'], help="Give your cultural object a descriptive title")
                     
                     # Pre-fill user data if logged in
                     if user:
-                        contributor_name = st.text_input("Your Name", value=user['name'], help="Your name for attribution")
-                        contributor_email = st.text_input("Email", value=user['email'], help="For follow-up questions or acknowledgments")
+                        contributor_name = st.text_input(get_text('name'), value=user['name'], help="Your name for attribution")
+                        contributor_email = st.text_input(get_text('email'), value=user['email'], help="For follow-up questions or acknowledgments")
                     else:
-                        contributor_name = st.text_input("Your Name", placeholder=NAME_PLACEHOLDER, help="Your name for attribution")
-                        contributor_email = st.text_input("Email (Optional)", placeholder="your.email@example.com", help="For follow-up questions or acknowledgments")
+                        contributor_name = st.text_input(get_text('name'), placeholder=placeholders['name'], help="Your name for attribution")
+                        contributor_email = st.text_input(f"{get_text('email')} ({get_text('optional')})", placeholder="your.email@example.com", help="For follow-up questions or acknowledgments")
                     
-                    language = st.selectbox("Language", ["Select Language"] + LANGUAGES, help="Language of your description")
+                    language = st.selectbox(get_text('language'), [get_text('select_language')] + LANGUAGES, help="Language of your description")
                 
                 with col2:
-                    category = st.selectbox("Category", ["Select Category"] + CATEGORIES, help="Choose the most appropriate category")
-                    latitude = st.number_input("Latitude", min_value=-90.0, max_value=90.0, value=None, placeholder="Auto-detected", help="Geographic latitude")
-                    longitude = st.number_input("Longitude", min_value=-180.0, max_value=180.0, value=None, placeholder="Auto-detected", help="Geographic longitude")
+                    categories = get_translated_categories()
+                    category = st.selectbox(get_text('category'), [get_text('select_category')] + categories, help="Choose the most appropriate category")
+                    latitude = st.number_input(get_text('latitude'), min_value=-90.0, max_value=90.0, value=None, placeholder="Auto-detected", help="Geographic latitude")
+                    longitude = st.number_input(get_text('longitude'), min_value=-180.0, max_value=180.0, value=None, placeholder="Auto-detected", help="Geographic longitude")
                 
                 description = st.text_area(
-                    "Description",
-                    placeholder=DESCRIPTION_PLACEHOLDER,
+                    get_text('description'),
+                    placeholder=placeholders['description'],
                     height=TEXT_AREA_HEIGHT,
-                    help="Describe the cultural significance, usage, and context of this object or practice"
+                    help="Describe the cultural object, its significance, usage, and cultural context"
                 )
                 
                 # Initialize local language variables
@@ -691,26 +709,26 @@ def cultural_corpus_page(user=None):
                     
                     with col1:
                         local_language_name = st.text_input(
-                            "Local Language Name",
+                            get_text('local_name'),
                             placeholder="What is this called in your local language?",
                             help="Enter the name of this object in your local language or dialect"
                         )
                         
                         dialect = st.text_input(
-                            "Dialect/Regional Variation",
+                            get_text('dialect_variation'),
                             placeholder="e.g., Telugu (Hyderabad), Bengali (Kolkata)",
                             help="Specify the dialect or regional variation of your language"
                         )
                     
                     with col2:
                         pronunciation_guide = st.text_input(
-                            "Pronunciation Guide",
+                            get_text('pronunciation_guide'),
                             placeholder="e.g., 'gulab-jamun' (goo-lahb jah-moon)",
                             help="Provide a pronunciation guide in English letters"
                         )
                         
                         cultural_context = st.text_input(
-                            "Cultural Context",
+                            get_text('cultural_context'),
                             placeholder="e.g., Used in weddings, festivals, daily prayers",
                             help="When and how is this object used in your culture?"
                         )
@@ -734,14 +752,14 @@ def cultural_corpus_page(user=None):
                         st.audio(audio_recording, caption="Your pronunciation recording")
                 
                 contributor_details = st.text_area(
-                    "About You (Optional)",
+                    f"About You ({get_text('optional')})",
                     placeholder=USER_DETAILS_PLACEHOLDER,
                     height=100,
                     help="Tell us about your cultural background, profession, or connection to this cultural object"
                 )
                 
                 # Submit button
-                submit_button = st.form_submit_button("🏛️ Submit to Cultural Corpus", use_container_width=True)
+                submit_button = st.form_submit_button(f"🏛️ {get_text('submit')}", use_container_width=True)
                 
                 if submit_button:
                     # Check authentication first
@@ -760,11 +778,11 @@ def cultural_corpus_page(user=None):
                         st.error(ERROR_NO_DESCRIPTION)
                         return
                     
-                    if category == "Select Category":
+                    if category == get_text('select_category'):
                         st.error(ERROR_NO_CATEGORY)
                         return
                     
-                    if language == "Select Language":
+                    if language == get_text('select_language'):
                         st.error("Please select a language")
                         return
                     
@@ -882,9 +900,9 @@ def idi_emiti_page(user=None):
         st.session_state.audio_reset_trigger = 0
     
     # Hero Section
-    st.markdown("""
+    st.markdown(f"""
     <div class="hero-section">
-        <h1 class="hero-title">🤔 Idi-Emiti (What is this?)</h1>
+        <h1 class="hero-title">🤔 {get_text('idi_emiti')}</h1>
         <p class="hero-subtitle">Help us preserve cultural vocabulary by identifying traditional objects in your language</p>
     </div>
     """, unsafe_allow_html=True)
@@ -909,7 +927,7 @@ def idi_emiti_page(user=None):
         
         if random_image and get_media_type(random_image) == "image":
             # Display the image with skip button below
-            st.markdown("### 🖼️ What is this object called in your language?")
+            st.markdown(f"### 🖼️ {get_text('what_is_this')}")
             
             col1, col2 = st.columns([2, 1])
             
@@ -920,7 +938,7 @@ def idi_emiti_page(user=None):
                 st.markdown("---")
                 skip_col1, skip_col2, skip_col3 = st.columns([1, 1, 1])
                 with skip_col2:
-                    if st.button("⏭️ Skip This Object", use_container_width=True, help="Skip to a different cultural object"):
+                    if st.button(f"⏭️ {get_text('skip_object')}", use_container_width=True, help="Skip to a different cultural object"):
                         st.rerun()
             
             with col2:
@@ -947,26 +965,26 @@ def idi_emiti_page(user=None):
                 
                 with col1:
                     local_name = st.text_input(
-                        "Local Language Name",
+                        get_text('local_name'),
                         placeholder="What is this called in your language?",
                         help="Enter the name of this object in your local language or dialect"
                     )
                     
                     dialect = st.text_input(
-                        "Dialect/Regional Variation",
+                        get_text('dialect_variation'),
                         placeholder="e.g., Telugu (Hyderabad), Bengali (Kolkata)",
                         help="Specify the dialect or regional variation of your language"
                     )
                     
                     pronunciation = st.text_input(
-                        "Pronunciation Guide",
+                        get_text('pronunciation_guide'),
                         placeholder="e.g., 'gulab-jamun' (goo-lahb jah-moon)",
                         help="Provide a pronunciation guide in English letters"
                     )
                 
                 with col2:
                     cultural_use = st.text_input(
-                        "Cultural Use/Context",
+                        get_text('cultural_context'),
                         placeholder="e.g., Used in cooking, festivals, daily life",
                         help="When and how is this object used in your culture?"
                     )
@@ -978,7 +996,7 @@ def idi_emiti_page(user=None):
                     )
                     
                     additional_info = st.text_area(
-                        "Additional Information (Optional)",
+                        f"Additional Information ({get_text('optional')})",
                         placeholder="Any other details about this object...",
                         height=100,
                         help="Share any additional cultural context or memories"
@@ -1010,16 +1028,16 @@ def idi_emiti_page(user=None):
                 button_col1, button_col2, button_col3, button_col4 = st.columns([2, 1, 1, 1])
                 
                 with button_col1:
-                    submit_button = st.form_submit_button("🏛️ Submit Identification", use_container_width=True)
+                    submit_button = st.form_submit_button(f"🏛️ {get_text('submit_identification')}", use_container_width=True)
                 
                 with button_col2:
-                    reset_button = st.form_submit_button("🔄 Reset Form", use_container_width=True)
+                    reset_button = st.form_submit_button(f"🔄 {get_text('reset_recording')}", use_container_width=True)
                 
                 with button_col3:
-                    rerecord_button = st.form_submit_button("🎤 Re-record Audio", use_container_width=True)
+                    rerecord_button = st.form_submit_button(f"🎤 {get_text('re_record')}", use_container_width=True)
                 
                 with button_col4:
-                    new_object_button = st.form_submit_button("🆕 New Object", use_container_width=True)
+                    new_object_button = st.form_submit_button(f"🆕 {get_text('new_object')}", use_container_width=True)
                 
                 # Handle button actions
                 if submit_button:
@@ -1132,40 +1150,47 @@ def landing_page():
         st.markdown(f"""
         <div style="background: linear-gradient(90deg, #667eea, #764ba2, #f093fb); padding: 1rem; text-align: center; color: white; margin: -1rem -1rem 1rem -1rem; border-radius: 0 0 20px 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
-                <div style="font-weight: bold; font-size: 1.1rem;">🏛️ Cultural Heritage Platform</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">🏛️ {get_text('app_title')}</div>
                 <div style="display: flex; gap: 1rem; align-items: center;">
-                    <span style="background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.3);">👤 Welcome, {user['name']}</span>
-                    <a href="?page=My_Profile" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3);">My Profile</a>
-                    <a href="?page=Cultural_Corpus_Collection" style="background: rgba(255, 255, 255, 0.9); color: #667eea; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold;">Start Contributing</a>
+                    <span style="background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.3);">👤 {get_text('welcome')}, {user['name']}</span>
+                    <a href="?page=My_Profile" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3);">{get_text('my_profile')}</a>
+                    <a href="?page=Cultural_Corpus_Collection" style="background: rgba(255, 255, 255, 0.9); color: #667eea; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold;">{get_text('start_contributing')}</a>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     else:
         # Guest user banner
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: linear-gradient(90deg, #667eea, #764ba2, #f093fb); padding: 1rem; text-align: center; color: white; margin: -1rem -1rem 1rem -1rem; border-radius: 0 0 20px 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
-                <div style="font-weight: bold; font-size: 1.1rem;">🏛️ Cultural Heritage Platform</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">🏛️ {get_text('app_title')}</div>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="?page=Login" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3);">Sign In</a>
-                    <a href="?page=Sign_Up" style="background: rgba(255, 255, 255, 0.9); color: #667eea; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold;">Sign Up</a>
+                    <a href="?page=Login" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3);">{get_text('sign_in')}</a>
+                    <a href="?page=Sign_Up" style="background: rgba(255, 255, 255, 0.9); color: #667eea; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: bold;">{get_text('sign_up')}</a>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     # Hero Section
-    st.markdown("""
+    st.markdown(f"""
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); padding: 4rem 2rem; text-align: center; color: white; border-radius: 0 0 40px 40px; margin: -1rem -1rem 3rem -1rem;">
-        <h1 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">🏛️ Cultural Corpus Collection Platform</h1>
-        <p style="font-size: 1.4rem; margin-bottom: 2rem; opacity: 0.95;">Preserving Cultural Heritage Through Multimodal Data Collection</p>
+        <h1 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">🏛️ {get_text('app_title')}</h1>
+        <p style="font-size: 1.4rem; margin-bottom: 2rem; opacity: 0.95;">{get_text('app_description')}</p>
         <div style="margin-top: 2rem;">
-            <a href="#features" style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem;">Explore Features</a>
-            <a href="#get-started" style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem;">Get Started</a>
+            <a href="#features" style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem;">{get_text('explore_features')}</a>
+            <a href="#get-started" style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem;">{get_text('get_started')}</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Language Banner
+    render_language_banner()
+    
+    # Storage Status Display
+    st.markdown(f"### 📊 {get_text('system_status')}")
+    display_storage_status()
     
     # Quick Action Section
     if user:
@@ -1173,34 +1198,30 @@ def landing_page():
         st.markdown(f"""
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 2rem 0; text-align: center;">
             <h2 style="margin-bottom: 1rem;">🚀 Welcome back, {user['name']}!</h2>
-            <p style="margin-bottom: 2rem; font-size: 1.1rem;">Continue your cultural preservation journey</p>
+            <p style="margin-bottom: 2rem; font-size: 1.1rem;">{get_text('continue_journey')}</p>
             <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                <a href="?page=Cultural_Corpus_Collection" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">Upload Content</a>
-                <a href="?page=Idi_Emiti" style="background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">Play Idi-Emiti</a>
-                <a href="?page=My_Profile" style="background: linear-gradient(45deg, #48dbfb, #0abde3); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">My Profile</a>
+                <a href="?page=Cultural_Corpus_Collection" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">{get_text('upload_content')}</a>
+                <a href="?page=Idi_Emiti" style="background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">{get_text('play_idi_emiti')}</a>
+                <a href="?page=My_Profile" style="background: linear-gradient(45deg, #48dbfb, #0abde3); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">{get_text('my_profile')}</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
     else:
         # Guest user actions
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 2rem 0; text-align: center;">
-            <h2 style="margin-bottom: 1rem;">🚀 Ready to Start?</h2>
-            <p style="margin-bottom: 2rem; font-size: 1.1rem;">Join thousands of contributors preserving cultural heritage worldwide</p>
+            <h2 style="margin-bottom: 1rem;">🚀 {get_text('ready_to_start')}</h2>
+            <p style="margin-bottom: 2rem; font-size: 1.1rem;">{get_text('join_thousands')}</p>
             <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                <a href="?page=Login" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">Sign In</a>
-                <a href="?page=Sign_Up" style="background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">Create Account</a>
+                <a href="?page=Login" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">{get_text('sign_in')}</a>
+                <a href="?page=Sign_Up" style="background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin: 0.5rem; transition: transform 0.3s ease;">{get_text('create_account')}</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     # Platform Overview
-    st.markdown("## 🌍 About Our Platform")
-    st.markdown("""
-    The Cultural Corpus Collection Platform is a comprehensive digital repository designed to preserve and document 
-    cultural heritage through multimodal data collection. Our platform enables communities to share, document, and 
-    preserve their cultural traditions, languages, and artifacts for future generations.
-    """)
+    st.markdown(f"## 🌍 {get_text('about_platform')}")
+    st.markdown(get_text('platform_description'))
     
     # Key Statistics
     try:
@@ -1216,99 +1237,98 @@ def landing_page():
         languages_documented = 0
         cultural_identifications = 0
     
-    st.markdown("""
+    st.markdown(f"""
     <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 3rem 2rem; border-radius: 20px; margin: 2rem 0; color: white;">
-        <h2 style="text-align: center; margin-bottom: 2rem;">📊 Platform Impact</h2>
+        <h2 style="text-align: center; margin-bottom: 2rem;">📊 {get_text('platform_impact')}</h2>
         <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
             <div style="text-align: center; margin: 1rem;">
-                <h3 style="font-size: 2.5rem; margin: 0;">{}</h3>
-                <p>Cultural Submissions</p>
+                <h3 style="font-size: 2.5rem; margin: 0;">{total_submissions}</h3>
+                <p>{get_text('cultural_submissions')}</p>
             </div>
             <div style="text-align: center; margin: 1rem;">
-                <h3 style="font-size: 2.5rem; margin: 0;">{}</h3>
-                <p>Active Contributors</p>
+                <h3 style="font-size: 2.5rem; margin: 0;">{unique_contributors}</h3>
+                <p>{get_text('active_contributors')}</p>
             </div>
             <div style="text-align: center; margin: 1rem;">
-                <h3 style="font-size: 2.5rem; margin: 0;">{}</h3>
-                <p>Languages Documented</p>
+                <h3 style="font-size: 2.5rem; margin: 0;">{languages_documented}</h3>
+                <p>{get_text('languages_documented')}</p>
             </div>
             <div style="text-align: center; margin: 1rem;">
-                <h3 style="font-size: 2.5rem; margin: 0;">{}</h3>
-                <p>Cultural Identifications</p>
+                <h3 style="font-size: 2.5rem; margin: 0;">{cultural_identifications}</h3>
+                <p>{get_text('cultural_identifications')}</p>
             </div>
         </div>
     </div>
-    """.format(total_submissions, unique_contributors, languages_documented, cultural_identifications), 
-    unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     # Features Section
-    st.markdown("## ✨ Platform Features")
+    st.markdown(f"## ✨ {get_text('platform_features')}")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 1rem 0;">
-            <h3>📁 Cultural Corpus Collection</h3>
+            <h3>📁 {get_text('cultural_corpus')}</h3>
             <p>Upload and document cultural objects, traditions, and practices with rich metadata including images, 
             audio recordings, and videos. Support for multiple languages and regional dialects.</p>
             <ul>
-                <li>Multimodal media upload (images, audio, video)</li>
-                <li>Local language and dialect documentation</li>
-                <li>Cultural context and usage information</li>
-                <li>Geographic location tracking</li>
+                <li>{get_text('multimodal_upload')}</li>
+                <li>{get_text('local_language')}</li>
+                <li>{get_text('cultural_context')}</li>
+                <li>{get_text('geographic_tracking')}</li>
             </ul>
             <div style="margin-top: 1rem;">
-                <a href="?page=Cultural_Corpus_Collection" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">Start Collection</a>
+                <a href="?page=Cultural_Corpus_Collection" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">{get_text('start_collection')}</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 1rem 0;">
-            <h3>🤔 Idi-Emiti (What is this?)</h3>
+            <h3>🤔 {get_text('idi_emiti')}</h3>
             <p>Interactive cultural object identification game that helps preserve traditional vocabulary and 
             linguistic diversity. Users identify cultural objects in their local languages.</p>
             <ul>
-                <li>Cultural object identification</li>
-                <li>Local language vocabulary preservation</li>
-                <li>Audio pronunciation recordings</li>
-                <li>Regional dialect documentation</li>
+                <li>{get_text('cultural_identification')}</li>
+                <li>{get_text('vocabulary_preservation')}</li>
+                <li>{get_text('audio_pronunciation')}</li>
+                <li>{get_text('dialect_documentation')}</li>
             </ul>
             <div style="margin-top: 1rem;">
-                <a href="?page=Idi_Emiti" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">Try Idi-Emiti</a>
+                <a href="?page=Idi_Emiti" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">{get_text('try_idi_emiti')}</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 1rem 0;">
-            <h3>📊 Analytics Dashboard</h3>
+            <h3>📊 {get_text('analytics')}</h3>
             <p>Comprehensive analytics and insights into cultural data collection, user engagement, and 
             platform growth. Monitor linguistic diversity and cultural preservation efforts.</p>
             <ul>
-                <li>Real-time platform statistics</li>
-                <li>Language and dialect analytics</li>
-                <li>User engagement metrics</li>
-                <li>Data quality assessment</li>
+                <li>{get_text('real_time_stats')}</li>
+                <li>{get_text('language_analytics')}</li>
+                <li>{get_text('user_engagement')}</li>
+                <li>{get_text('data_quality')}</li>
             </ul>
             <div style="margin-top: 1rem;">
-                <a href="?page=Analytics_Dashboard" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">View Analytics</a>
+                <a href="?page=Analytics_Dashboard" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">{get_text('view_analytics')}</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 1rem 0;">
-            <h3>🔐 User Authentication</h3>
+            <h3>🔐 {get_text('secure_login')}</h3>
             <p>Secure user management system with profile management, contribution tracking, and 
             personalized experience. Support for both MySQL and local storage.</p>
             <ul>
-                <li>Secure login and registration</li>
-                <li>User profile management</li>
-                <li>Contribution history tracking</li>
-                <li>Hybrid database support</li>
+                <li>{get_text('secure_login')}</li>
+                <li>{get_text('profile_management')}</li>
+                <li>{get_text('contribution_tracking')}</li>
+                <li>{get_text('hybrid_database')}</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -1536,9 +1556,9 @@ def landing_page():
 
 def analytics_dashboard_page():
     """Analytics dashboard page"""
-    st.markdown("""
+    st.markdown(f"""
     <div class="hero-section">
-        <h1 class="hero-title">📊 Analytics Dashboard</h1>
+        <h1 class="hero-title">📊 {get_text('analytics_dashboard')}</h1>
         <p class="hero-subtitle">Insights into cultural corpus growth and engagement</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1551,15 +1571,15 @@ def analytics_dashboard_page():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total Submissions", analytics.get('growth_metrics', {}).get('total_submissions', 0))
+        st.metric(get_text('total_submissions'), analytics.get('growth_metrics', {}).get('total_submissions', 0))
     
     with col2:
         engagement = analytics.get('user_engagement', {})
-        st.metric("Unique Contributors", engagement.get('unique_contributors', 0))
+        st.metric(get_text('total_contributors'), engagement.get('unique_contributors', 0))
     
     with col3:
         content = analytics.get('content_analysis', {})
-        st.metric("Languages Used", content.get('total_languages', 0))
+        st.metric(get_text('total_languages'), content.get('total_languages', 0))
     
     with col4:
         quality = analytics.get('quality_metrics', {})
@@ -1570,19 +1590,19 @@ def analytics_dashboard_page():
     
     # Media type distribution
     if analytics.get('content_analysis', {}).get('media_type_distribution'):
-        st.markdown("#### Media Type Distribution")
+        st.markdown(f"#### {get_text('media_type_distribution')}")
         media_dist = analytics['content_analysis']['media_type_distribution']
         st.bar_chart(media_dist)
     
     # Language distribution
     if analytics.get('content_analysis', {}).get('most_common_language'):
-        st.markdown("#### Language Distribution")
+        st.markdown(f"#### {get_text('language_distribution')}")
         # This would need to be implemented with actual language data
         st.info("Language distribution chart would be displayed here")
     
     # Growth trends
     if analytics.get('growth_metrics', {}).get('avg_daily_submissions'):
-        st.markdown("#### Growth Trends")
+        st.markdown(f"#### {get_text('growth_trends')}")
         growth = analytics['growth_metrics']
         st.metric("Average Daily Submissions", f"{growth.get('avg_daily_submissions', 0):.2f}")
         st.metric("First Submission", growth.get('first_submission_date', 'N/A'))
@@ -1590,9 +1610,9 @@ def analytics_dashboard_page():
 
 def authentication_page(auth_type):
     """Authentication page for login or signup"""
-    st.markdown("""
+    st.markdown(f"""
     <div class="hero-section">
-        <h1 class="hero-title">🔐 User Authentication</h1>
+        <h1 class="hero-title">🔐 {get_text('secure_login')}</h1>
         <p class="hero-subtitle">Join our cultural preservation community</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1612,9 +1632,9 @@ def authentication_page(auth_type):
 
 def admin_panel_page():
     """Admin panel page"""
-    st.markdown("""
+    st.markdown(f"""
     <div class="hero-section">
-        <h1 class="hero-title">🔧 Admin Panel</h1>
+        <h1 class="hero-title">🔧 {get_text('admin_panel')}</h1>
         <p class="hero-subtitle">Manage and curate cultural corpus data</p>
     </div>
     """, unsafe_allow_html=True)
