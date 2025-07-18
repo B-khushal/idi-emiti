@@ -59,6 +59,20 @@ Comprehensive categorization system covering:
 - **Backup Support**: Database backup and restore capabilities
 - **Multi-user Support**: Concurrent user access and transactions
 
+### 🌍 Multilingual Support ✅ **NEW**
+- **Dynamic Language Switching**: Real-time language changes
+- **Multiple Languages**: English, Hindi, Telugu support
+- **Cultural Translations**: Context-aware translations
+- **RTL Support**: Right-to-left language support
+- **Localized UI**: All interface elements translated
+
+### 🎮 Idi-Emiti Cultural Game ✅ **NEW**
+- **Interactive Identification**: Cultural object identification game
+- **Local Language Preservation**: Vocabulary preservation through gameplay
+- **Audio Recording**: Pronunciation recording features
+- **Cultural Context**: Regional dialect documentation
+- **Engagement Analytics**: Game participation tracking
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -247,17 +261,30 @@ This platform serves as a vital tool for:
 - **Linguistic Research**: Supporting regional language documentation
 - **AI Development**: Providing training data for cultural AI models
 - **Academic Research**: Enabling cultural studies and analysis
-- **Community Engagement**: Connecting cultural communities globally
+
+## 🚀 Deployment
+
+### Streamlit Cloud Deployment
+1. **Connect Repository**: Link your Git repository to Streamlit Cloud
+2. **Configure Environment**: Set up environment variables
+3. **Deploy**: Automatic deployment with each push
+4. **Monitor**: Track performance and usage analytics
+
+### Local Deployment
+1. **Install Dependencies**: `pip install -r requirements.txt`
+2. **Configure Database**: Set up MySQL or use local storage
+3. **Run Application**: `streamlit run app.py`
+4. **Access Platform**: Open browser to localhost:8501
 
 ## 🤝 Contributing
 
-We welcome contributions to enhance the platform:
+We welcome contributions to improve the platform:
 
-1. **Bug Reports**: Report issues and suggest improvements
-2. **Feature Requests**: Propose new functionality
-3. **Code Contributions**: Submit pull requests for enhancements
-4. **Cultural Data**: Contribute cultural objects and knowledge
-5. **Documentation**: Help improve guides and documentation
+1. **Fork the repository**
+2. **Create a feature branch**
+3. **Make your changes**
+4. **Test thoroughly**
+5. **Submit a pull request**
 
 ## 📄 License
 
@@ -265,18 +292,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- Cultural communities and contributors
-- Regional language experts and researchers
-- Open source community and tools
-- Academic institutions supporting cultural preservation
-
-## 📞 Support
-
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation and guides
+- **Swecha**: For supporting cultural preservation initiatives
+- **SOAI Hackathon**: For providing the platform to showcase this project
+- **Contributors**: All users who contribute cultural data
+- **Open Source Community**: For the amazing tools and libraries used
 
 ---
 
-**🏛️ Preserving Cultural Heritage, One Contribution at a Time** 
+**🏛️ Cultural Corpus Collection Platform** - Preserving cultural heritage through technology and community collaboration.

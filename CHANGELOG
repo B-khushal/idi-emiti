@@ -1,0 +1,56 @@
+📄 Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on Keep a Changelog.
+
+[1.0.0] - 2025-07-17
+Added
+Initial project setup with Streamlit framework
+
+Basic app layout displaying cultural object images
+
+User input functionality to enter slang/local names
+
+Admin authentication using streamlit-authenticator
+
+Data storage using Pandas CSV
+
+Analytics dashboard with Plotly visualizations
+
+Responsive glassmorphism UI design
+
+Requirements.txt with all dependencies
+
+Changed
+Optimized image loading using Pillow for faster display
+
+Improved UI layout with custom CSS for mobile responsiveness
+
+Fixed
+CSV file writing bug in user response storage
+
+Admin login redirect issue on failed authentication
+
+[0.1.0] - 2025-07-10
+Added
+Project idea finalized (Cultural Discovery Game)
+
+Team roles and responsibilities assigned
+
+Initial README.md created with problem statement, solution, and team details
+
+Git repository initialized
+
+🔮 Planned
+Upcoming Features
+Machine learning integration for cultural object recognition
+
+Mobile app development using React Native
+
+API development for external integrations
+
+Database migration from CSV to PostgreSQL
+
+Advanced user profile features and community interaction modules
+
+Built with ❤️ by Team Neuronova
