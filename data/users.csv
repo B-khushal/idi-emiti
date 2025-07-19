@@ -1,0 +1,2 @@
+user_id,username,email,password_hash,full_name,bio,country,region,city,cultural_background,profession,location,created_at,last_login,is_active,role,display_publicly
+b9b0f095577de5b9c61db1767a71db65,khushal,khushal@gmail.com,15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225,khushal,,,,,,,,2025-07-19T21:31:44.527742,2025-07-19T21:31:59.503866,True,contributor,True

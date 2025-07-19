@@ -112,16 +112,16 @@ TRANSLATIONS = {
         'admin_panel': 'Admin Panel',
         'system_status': 'System Status',
         'using_local_storage': 'Using Local JSON Storage',
-        'connected_to_mysql': 'Connected to MySQL Database',
-        'mysql_setup_guide': 'Want to use MySQL database?',
-        'mysql_setup_instructions': '''**To enable MySQL database storage:**
+        'connected_to_csv': 'Connected to CSV Storage System',
+'csv_setup_guide': 'Using CSV-based storage system',
+'csv_setup_instructions': '''**CSV-based storage system:**
 
-1. **Install MySQL Server** on your local machine
-2. **Create database:** `cultural_corpus_platform`
-3. **Update credentials** in `db_config.py`
-4. **Run migration:** `python migrate_to_mysql.py`
+The application uses CSV files for data storage:
+- User data stored in `data/users.csv`
+- Session data stored in `data/sessions.csv`
+- User responses stored in `data/user_responses.csv`
 
-The app will automatically detect and use MySQL when available.''',
+No additional setup required.''',
         'about_platform': 'About Our Platform',
         'platform_description': '''The Cultural Corpus Collection Platform is a comprehensive digital repository designed to preserve and document 
 cultural heritage through multimodal data collection. Our platform enables communities to share, document, and 
@@ -150,7 +150,7 @@ preserve their cultural traditions, languages, and artifacts for future generati
         'secure_login': 'Secure login and registration',
         'profile_management': 'User profile management',
         'contribution_tracking': 'Contribution history tracking',
-        'hybrid_database': 'Hybrid database support',
+        'csv_storage': 'CSV-based storage system',
         'technology_stack': 'Technology Stack',
         'get_started': 'Get Started',
         'explore_features': 'Explore Features',
@@ -296,16 +296,16 @@ preserve their cultural traditions, languages, and artifacts for future generati
         'admin_panel': 'प्रशासक पैनल',
         'system_status': 'सिस्टम स्थिति',
         'using_local_storage': 'स्थानीय JSON भंडारण का उपयोग कर रहे हैं',
-        'connected_to_mysql': 'MySQL डेटाबेस से जुड़ा हुआ',
-        'mysql_setup_guide': 'MySQL डेटाबेस का उपयोग करना चाहते हैं?',
-        'mysql_setup_instructions': '''**MySQL डेटाबेस भंडारण सक्षम करने के लिए:**
+        'connected_to_csv': 'CSV स्टोरेज सिस्टम से जुड़ा हुआ',
+        'csv_setup_guide': 'CSV-आधारित स्टोरेज सिस्टम का उपयोग कर रहे हैं',
+        'csv_setup_instructions': '''**CSV-आधारित स्टोरेज सिस्टम:**
 
-1. **MySQL सर्वर इंस्टॉल करें** अपने स्थानीय मशीन पर
-2. **डेटाबेस बनाएं:** `cultural_corpus_platform`
-3. **db_config.py में क्रेडेंशियल अपडेट करें**
-4. **माइग्रेशन चलाएं:** `python migrate_to_mysql.py`
+एप्लिकेशन डेटा स्टोरेज के लिए CSV फाइलों का उपयोग करती है:
+- उपयोगकर्ता डेटा `data/users.csv` में संग्रहित
+- सेशन डेटा `data/sessions.csv` में संग्रहित
+- उपयोगकर्ता प्रतिक्रियाएं `data/user_responses.csv` में संग्रहित
 
-ऐप स्वचालित रूप से MySQL का पता लगाएगा और उपलब्ध होने पर उसका उपयोग करेगा।''',
+कोई अतिरिक्त सेटअप आवश्यक नहीं।''',
         'about_platform': 'हमारे मंच के बारे में',
         'platform_description': '''सांस्कृतिक कोष संग्रहण मंच एक व्यापक डिजिटल भंडार है जो बहु-माध्यम डेटा संग्रहण के माध्यम से 
 सांस्कृतिक विरासत को संरक्षित और दस्तावेज करने के लिए डिज़ाइन किया गया है। हमारा मंच समुदायों को साझा करने, दस्तावेज करने और 
@@ -334,7 +334,7 @@ preserve their cultural traditions, languages, and artifacts for future generati
         'secure_login': 'सुरक्षित लॉगिन और पंजीकरण',
         'profile_management': 'उपयोगकर्ता प्रोफाइल प्रबंधन',
         'contribution_tracking': 'योगदान इतिहास ट्रैकिंग',
-        'hybrid_database': 'हाइब्रिड डेटाबेस समर्थन',
+        'csv_storage': 'CSV-आधारित भंडारण प्रणाली',
         'technology_stack': 'तकनीकी स्टैक',
         'get_started': 'शुरू करें',
         'explore_features': 'विशेषताएं देखें',
@@ -480,16 +480,16 @@ preserve their cultural traditions, languages, and artifacts for future generati
         'admin_panel': 'అడ్మిన్ పానెల్',
         'system_status': 'సిస్టమ్ స్థితి',
         'using_local_storage': 'స్థానిక JSON నిల్వను ఉపయోగిస్తున్నారు',
-        'connected_to_mysql': 'MySQL డేటాబేస్‌తో కనెక్ట్ చేయబడింది',
-        'mysql_setup_guide': 'MySQL డేటాబేస్ ఉపయోగించాలనుకుంటున్నారా?',
-        'mysql_setup_instructions': '''**MySQL డేటాబేస్ నిల్వను ప్రారంభించడానికి:**
+        'connected_to_csv': 'CSV నిల్వ వ్యవస్థతో కనెక్ట్ చేయబడింది',
+        'csv_setup_guide': 'CSV-ఆధారిత నిల్వ వ్యవస్థను ఉపయోగిస్తున్నారు',
+        'csv_setup_instructions': '''**CSV-ఆధారిత నిల్వ వ్యవస్థ:**
 
-1. **MySQL సర్వర్‌ని ఇన్‌స్టాల్ చేయండి** మీ స్థానిక మెషీన్‌లో
-2. **డేటాబేస్‌ని సృష్టించండి:** `cultural_corpus_platform`
-3. **db_config.pyలో క్రెడెన్షియల్స్‌ని అప్‌డేట్ చేయండి**
-4. **మైగ్రేషన్‌ని అమలు చేయండి:** `python migrate_to_mysql.py`
+అప్లికేషన్ డేటా నిల్వ కోసం CSV ఫైల్‌లను ఉపయోగిస్తుంది:
+- వినియోగదారు డేటా `data/users.csv` లో నిల్వ చేయబడుతుంది
+- సెషన్ డేటా `data/sessions.csv` లో నిల్వ చేయబడుతుంది
+- వినియోగదారు ప్రతిస్పందనలు `data/user_responses.csv` లో నిల్వ చేయబడతాయి
 
-అప్లికేషన్ స్వయంచాలకంగా MySQLని గుర్తించి, అందుబాటులో ఉన్నప్పుడు దానిని ఉపయోగిస్తుంది.''',
+అదనపు సెటప్ అవసరం లేదు.''',
         'about_platform': 'మా వేదిక గురించి',
         'platform_description': '''సాంస్కృతిక కోర్పస్ సేకరణ వేదిక అనేది బహుళ-మాధ్యమ డేటా సేకరణ ద్వారా 
 సాంస్కృతిక వారసత్వాన్ని పరిరక్షించడానికి మరియు డాక్యుమెంట్ చేయడానికి రూపొందించబడిన సమగ్ర డిజిటల్ రిపోజిటరీ. మా వేదిక సమాజాలను పంచుకోవడానికి, డాక్యుమెంట్ చేయడానికి మరియు 
@@ -518,7 +518,7 @@ preserve their cultural traditions, languages, and artifacts for future generati
         'secure_login': 'సురక్షిత లాగిన్ మరియు నమోదు',
         'profile_management': 'వినియోగదారు ప్రొఫైల్ నిర్వహణ',
         'contribution_tracking': 'సహకార చరిత్ర ట్రాకింగ్',
-        'hybrid_database': 'హైబ్రిడ్ డేటాబేస్ మద్దతు',
+        'csv_storage': 'CSV-ఆధారిత నిల్వ వ్యవస్థ',
         'technology_stack': 'టెక్నాలజీ స్టాక్',
         'get_started': 'ప్రారంభించండి',
         'explore_features': 'లక్షణాలను అన్వేషించండి',
@@ -653,7 +653,7 @@ preserve their cultural traditions, languages, and artifacts for future generati
 
 # Messages
 SUCCESS_MESSAGE = "✅ Submission saved successfully!"
-INFO_MESSAGE = "ℹ️ Using local JSON storage (MySQL not available)"
+INFO_MESSAGE = "ℹ️ Using CSV-based storage system"
 ERROR_NO_DESCRIPTION = "❌ Please provide a description"
 ERROR_NO_MEDIA = "❌ Please upload at least one media file"
 ERROR_INVALID_FILE = "❌ Invalid file type. Please upload an image, audio, or video file"

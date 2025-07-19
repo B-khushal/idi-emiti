@@ -490,7 +490,7 @@ def main():
         if user:
             st.markdown(f"**👤 Welcome, {user['name']}**")
             if st.button("🚪 Logout", use_container_width=True):
-                logout_user(st.session_state['user_session'])
+                logout_user_session(st.session_state['user_session'])
                 st.session_state.clear()
                 st.rerun()
             st.markdown("---")
@@ -796,7 +796,7 @@ def cultural_corpus_page(user=None):
                         if media_type == "image" and audio_recording is not None:
                             audio_filename, audio_path = save_uploaded_file(audio_recording, "audio")
                         
-                        # Save response to database
+                        # Save response to CSV storage
                         save_user_response(
                             media_filename=filename,
                             media_type=media_type,
@@ -878,7 +878,7 @@ def cultural_corpus_page(user=None):
                 <ul style="text-align: left; display: inline-block;">
                     <li>Preserve cultural heritage for future generations</li>
                     <li>Share knowledge across communities</li>
-                    <li>Build a comprehensive cultural database</li>
+                    <li>Build a comprehensive cultural repository</li>
                     <li>Connect people through shared traditions</li>
                 </ul>
             </div>
@@ -1057,7 +1057,7 @@ def idi_emiti_page(user=None):
                         if audio_recording is not None:
                             audio_filename, audio_path = save_uploaded_file(audio_recording, "audio")
                         
-                        # Save identification to database
+                        # Save identification to CSV storage
                         save_user_response(
                             media_filename=os.path.basename(random_image),
                             media_type="image",
@@ -1118,7 +1118,7 @@ def idi_emiti_page(user=None):
         # User contribution message
         st.markdown("---")
         st.markdown("### 🎯 Your Contribution")
-        st.info("Thank you for helping preserve cultural vocabulary! Your identification will be reviewed and added to our cultural database.")
+        st.info("Thank you for helping preserve cultural vocabulary! Your identification will be reviewed and added to our cultural repository.")
         
         # Cultural preservation message
         st.markdown("---")
@@ -1323,12 +1323,12 @@ def landing_page():
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 1rem 0;">
             <h3>🔐 {get_text('secure_login')}</h3>
             <p>Secure user management system with profile management, contribution tracking, and 
-            personalized experience. Support for both MySQL and local storage.</p>
+            personalized experience. CSV-based storage system.</p>
             <ul>
                 <li>{get_text('secure_login')}</li>
                 <li>{get_text('profile_management')}</li>
                 <li>{get_text('contribution_tracking')}</li>
-                <li>{get_text('hybrid_database')}</li>
+                <li>CSV-based data storage</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -1367,9 +1367,9 @@ def landing_page():
     with col3:
         st.markdown("""
         <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 2rem; margin: 1rem 0;">
-            <h4>Database</h4>
-            <ul>
-                <li>MySQL Database</li>
+            <h4>Storage</h4>
+<ul>
+<li>CSV-based Storage</li>
                 <li>CSV Data Storage</li>
                 <li>JSON Configuration</li>
                 <li>Data Migration Tools</li>
@@ -1412,7 +1412,7 @@ def landing_page():
         st.markdown("""
         <div style="background: rgba(255, 255, 255, 0.05); border-left: 4px solid #feca57; padding: 1.5rem; margin: 1rem 0; border-radius: 10px;">
             <h4>📚 Educational Resource</h4>
-            <p>Creating a comprehensive database for researchers, educators, and future generations to learn from.</p>
+            <p>Creating a comprehensive repository for researchers, educators, and future generations to learn from.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1429,7 +1429,7 @@ def landing_page():
         st.markdown("""
         <div style="text-align: center; padding: 2rem;">
             <h3>1️⃣ Create Account</h3>
-            <p>Sign up for a free account to start contributing to our cultural database.</p>
+            <p>Sign up for a free account to start contributing to our cultural repository.</p>
         </div>
         """, unsafe_allow_html=True)
     

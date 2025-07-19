@@ -50,14 +50,14 @@ Comprehensive categorization system covering:
 - **Guest Mode**: Anonymous contributions without registration
 - **Profile Integration**: Automatic form pre-filling for registered users
 
-### 🗄️ MySQL Database Integration ✅ **NEW**
-- **Robust Database**: MySQL database with comprehensive schema
-- **Scalable Storage**: Professional database management system
-- **Data Integrity**: Foreign key constraints and data validation
-- **Performance**: Optimized indexes for fast queries
-- **Migration Tools**: Easy migration from CSV to MySQL
-- **Backup Support**: Database backup and restore capabilities
-- **Multi-user Support**: Concurrent user access and transactions
+### 🗄️ CSV-Based Storage System ✅ **NEW**
+- **Simple Storage**: CSV files for easy data management
+- **No Database Setup**: No complex database configuration required
+- **Data Integrity**: Secure user authentication and session management
+- **Performance**: Fast read/write operations for local storage
+- **Portable**: Easy to backup, restore, and migrate
+- **Reliable**: No database connection issues or dependencies
+- **Multi-user Support**: Concurrent user access with session management
 
 ### 🌍 Multilingual Support ✅ **NEW**
 - **Dynamic Language Switching**: Real-time language changes
@@ -93,16 +93,11 @@ Comprehensive categorization system covering:
    pip install -r requirements.txt
    ```
 
-3. **Set up MySQL Database** (Recommended)
+3. **No Database Setup Required** ✅
    ```bash
-   # Follow the MySQL setup guide
-   # See MYSQL_SETUP_GUIDE.md for detailed instructions
-   
-   # Quick setup:
-   # 1. Install MySQL Server
-   # 2. Create database: cultural_corpus_platform
-   # 3. Run migration script
-   python migrate_to_mysql.py
+   # The application uses CSV-based storage
+   # CSV files are automatically created on first run
+   # No additional setup needed!
    ```
 
 4. **Run the application**
@@ -120,26 +115,24 @@ Comprehensive categorization system covering:
 cultural-corpus-platform/
 ├── app.py                 # Main Streamlit application
 ├── auth.py               # Authentication system
-├── database.py           # MySQL database operations
+├── csv_user_manager.py   # CSV-based user management system
 ├── config.py             # Configuration and constants
 ├── utils.py              # Core utility functions
 ├── admin_dashboard.py    # Admin analytics dashboard
 ├── requirements.txt      # Python dependencies
 ├── README.md            # This file
 ├── SETUP_GUIDE.md       # Detailed setup instructions
-├── MYSQL_SETUP_GUIDE.md # MySQL database setup guide
+├── CSV_MIGRATION_SUMMARY.md # CSV migration documentation
 ├── SYSTEM_OVERVIEW.md   # Technical architecture
 ├── PROJECT_ROADMAP.md   # Development roadmap
-├── database_schema.sql  # MySQL database schema
-├── migrate_to_mysql.py  # CSV to MySQL migration tool
 ├── test_auth.py         # Authentication system tests
 ├── test_multimodal.py   # Core functionality tests
-├── test_mysql.py        # MySQL database tests
+├── test_csv_system.py   # CSV system tests
 ├── assets/              # Sample media files
-├── data/                # Data storage (CSV + JSON)
-│   ├── users.json       # User accounts and profiles (legacy)
-│   ├── sessions.json    # Active user sessions (legacy)
-│   └── user_responses.csv # Cultural data submissions (legacy)
+├── data/                # Data storage (CSV files)
+│   ├── users.csv        # User accounts and profiles
+│   ├── sessions.csv     # Active user sessions
+│   └── user_responses.csv # Cultural data submissions
 ├── uploads/             # User uploaded files
 │   ├── images/          # Image uploads
 │   ├── audio/           # Audio uploads

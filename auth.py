@@ -1,6 +1,7 @@
 """
 Authentication module for Cultural Corpus Collection Platform
 Handles user registration, login, session management, and profile operations
+Uses CSV-based storage instead of MySQL database
 """
 
 import streamlit as st
@@ -13,115 +14,27 @@ from typing import Dict, Optional, Tuple, Any
 from pathlib import Path
 from config import DATA_FOLDER
 
-# User data file
-USERS_FILE = os.path.join(DATA_FOLDER, "users.json")
-SESSIONS_FILE = os.path.join(DATA_FOLDER, "sessions.json")
+# Import CSV-based user management
+from csv_user_manager import (
+    get_user_by_email, get_user_by_id, create_user, update_user_login,
+    update_user_profile, deactivate_user, create_session, validate_session,
+    logout_user, get_user_statistics, change_user_password, delete_user,
+    hash_password, verify_password
+)
 
 def ensure_auth_directories():
     """Ensure authentication data directories exist"""
     Path(DATA_FOLDER).mkdir(exist_ok=True)
 
-def get_auth_db():
-    """Get database instance for authentication - returns None if MySQL not available"""
+# Password functions are now imported from csv_user_manager
+# User and session loading/saving is handled by csv_user_manager
+
+def register_user(email: str, password: str, name: str, profile_data: Dict = None) -> Tuple[bool, Any]:
+    """Create a new user account using CSV storage"""
     try:
-        from database import get_database
-        return get_database()
-    except Exception as e:
-        print(f"MySQL not available, using JSON fallback: {e}")
-        return None
-
-def hash_password(password: str) -> str:
-    """Hash password using SHA-256"""
-    return hashlib.sha256(password.encode()).hexdigest()
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    """Verify password against hash"""
-    return hash_password(password) == hashed_password
-
-def load_users():
-    """Load users from JSON file"""
-    ensure_auth_directories()
-    if os.path.exists(USERS_FILE):
-        try:
-            with open(USERS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
-
-def save_users(users):
-    """Save users to JSON file"""
-    ensure_auth_directories()
-    with open(USERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(users, f, indent=2, ensure_ascii=False)
-
-def load_sessions():
-    """Load active sessions from JSON file"""
-    ensure_auth_directories()
-    if os.path.exists(SESSIONS_FILE):
-        try:
-            with open(SESSIONS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
-
-def save_sessions(sessions):
-    """Save active sessions to JSON file"""
-    ensure_auth_directories()
-    with open(SESSIONS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(sessions, f, indent=2, ensure_ascii=False)
-
-def create_user(email: str, password: str, name: str, profile_data: Dict = None) -> Tuple[bool, Any]:
-    """Create a new user account - tries MySQL first, falls back to JSON"""
-    # Try MySQL first
-    db = get_auth_db()
-    if db:
-        try:
-            # Check if email already exists
-            existing_user = db.get_user_by_email(email)
-            if existing_user:
-                return False, "Email already registered"
-            
-            # Validate email format
-            if '@' not in email or '.' not in email:
-                return False, "Invalid email format"
-            
-            # Validate password strength
-            if len(password) < 8:
-                return False, "Password must be at least 8 characters long"
-            
-            # Hash password
-            password_hash = hash_password(password)
-            
-            # Extract profile data
-            cultural_background = profile_data.get('cultural_background', '') if profile_data else ''
-            profession = profile_data.get('profession', '') if profile_data else ''
-            location = profile_data.get('location', '') if profile_data else ''
-            
-            # Create user in database
-            user_id = db.create_user(
-                username=email.split('@')[0],  # Use email prefix as username
-                email=email.lower(),
-                password_hash=password_hash,
-                full_name=name,
-                bio=f"Cultural Background: {cultural_background}, Profession: {profession}, Location: {location}"
-            )
-            
-            if user_id:
-                return True, user_id
-            else:
-                return False, "Failed to create user account"
-                
-        except Exception as e:
-            print(f"MySQL user creation failed, falling back to JSON: {e}")
-    
-    # Fallback to JSON storage
-    try:
-        users = load_users()
-        
         # Check if email already exists
-        if email.lower() in [user['email'].lower() for user in users.values()]:
+        existing_user = get_user_by_email(email)
+        if existing_user:
             return False, "Email already registered"
         
         # Validate email format
@@ -132,312 +45,175 @@ def create_user(email: str, password: str, name: str, profile_data: Dict = None)
         if len(password) < 8:
             return False, "Password must be at least 8 characters long"
         
-        # Create user object
-        user_id = secrets.token_hex(16)
-        user = {
-            'user_id': user_id,
-            'email': email.lower(),
-            'name': name,
-            'password_hash': hash_password(password),
-            'created_at': datetime.now().isoformat(),
-            'last_login': None,
-            'profile_data': profile_data or {},
-            'is_active': True,
-            'role': 'contributor'
-        }
+        # Hash password
+        password_hash = hash_password(password)
         
-        users[user_id] = user
-        save_users(users)
+        # Extract profile data
+        cultural_background = profile_data.get('cultural_background', '') if profile_data else ''
+        profession = profile_data.get('profession', '') if profile_data else ''
+        location = profile_data.get('location', '') if profile_data else ''
         
-        return True, user_id
+        # Create user using CSV manager
+        user_id = create_user(
+            username=email.split('@')[0],  # Use email prefix as username
+            email=email.lower(),
+            password_hash=password_hash,
+            full_name=name,
+            cultural_background=cultural_background,
+            profession=profession,
+            location=location
+        )
         
+        if user_id:
+            return True, user_id
+        else:
+            return False, "Failed to create user account"
+            
     except Exception as e:
         return False, f"Failed to create user: {str(e)}"
 
 def authenticate_user(email: str, password: str) -> Tuple[bool, Any]:
-    """Authenticate user with email and password - tries MySQL first, falls back to JSON"""
-    # Try MySQL first
-    db = get_auth_db()
-    if db:
-        try:
-            # Get user by email
-            user = db.get_user_by_email(email.lower())
-            if not user:
-                return False, "Invalid email or password"
-            
-            # Check if account is active
-            if not user.get('is_active', True):
-                return False, "Account is deactivated"
-            
-            # Verify password
-            if not verify_password(password, user['password_hash']):
-                return False, "Invalid email or password"
-            
-            # Update last login
-            db.update_user_login(user['user_id'])
-            
-            # Return user data
-            user_data = {
-                'user_id': user['user_id'],
-                'email': user['email'],
-                'name': user['full_name'] or user['username'],
-                'created_at': user['join_date'].isoformat() if user['join_date'] else datetime.now().isoformat(),
-                'last_login': user['last_login'].isoformat() if user['last_login'] else None,
-                'profile_data': {
-                    'cultural_background': '',
-                    'profession': '',
-                    'location': ''
-                },
-                'is_active': user.get('is_active', True),
-                'role': 'contributor'
-            }
-            
-            return True, user_data
-            
-        except Exception as e:
-            print(f"MySQL authentication failed, falling back to JSON: {e}")
-    
-    # Fallback to JSON storage
+    """Authenticate user with email and password using CSV storage"""
     try:
-        users = load_users()
-        
-        # Find user by email
-        user = None
-        for user_data in users.values():
-            if user_data['email'].lower() == email.lower():
-                user = user_data
-                break
-        
+        # Get user by email
+        user = get_user_by_email(email.lower())
         if not user:
             return False, "Invalid email or password"
         
-        if not user['is_active']:
+        # Check if account is active
+        if not user.get('is_active', True):
             return False, "Account is deactivated"
         
+        # Verify password
         if not verify_password(password, user['password_hash']):
             return False, "Invalid email or password"
         
         # Update last login
-        user['last_login'] = datetime.now().isoformat()
-        users[user['user_id']] = user
-        save_users(users)
+        update_user_login(user['user_id'])
         
-        return True, user
-        
-    except Exception as e:
-        return False, f"Authentication error: {str(e)}"
-
-def create_session(user_id) -> str:
-    """Create a new session for user"""
-    try:
-        # For now, we'll use a simple session token
-        # In a production system, you'd want to store sessions in the database
-        session_token = secrets.token_hex(32)
-        
-        # Store session in Streamlit session state for now
-        if 'sessions' not in st.session_state:
-            st.session_state.sessions = {}
-        
-        session = {
-            'user_id': user_id,
-            'created_at': datetime.now().isoformat(),
-            'expires_at': (datetime.now() + timedelta(days=7)).isoformat(),
+        # Return user data
+        user_data = {
+            'user_id': user['user_id'],
+            'email': user['email'],
+            'name': user['full_name'] or user['username'],
+            'created_at': user['created_at'],
+            'last_login': user['last_login'],
+            'profile_data': {
+                'cultural_background': user.get('cultural_background', ''),
+                'profession': user.get('profession', ''),
+                'location': user.get('location', '')
+            },
+            'is_active': user.get('is_active', True),
+            'role': user.get('role', 'contributor')
         }
         
-        st.session_state.sessions[session_token] = session
-        return session_token
+        return True, user_data
         
     except Exception as e:
+        return False, f"Authentication failed: {str(e)}"
+
+
+def create_user_session(user_id) -> str:
+    """Create a new session for user using CSV storage"""
+    try:
+        return create_session(user_id)
+    except Exception as e:
+        print(f"Error creating session: {e}")
         return None
 
-def validate_session(session_token: str) -> Optional[Dict]:
-    """Validate session token and return user data"""
+def validate_user_session(session_token: str) -> Optional[Dict]:
+    """Validate session token and return user data using CSV storage"""
     try:
-        if 'sessions' not in st.session_state:
+        user = validate_session(session_token)
+        if not user:
             return None
         
-        if session_token not in st.session_state.sessions:
-            return None
-        
-        session = st.session_state.sessions[session_token]
-        
-        # Check if session is expired
-        expires_at = datetime.fromisoformat(session['expires_at'])
-        if datetime.now() > expires_at:
-            # Remove expired session
-            del st.session_state.sessions[session_token]
-            return None
-        
-        # Get user data
-        db = get_auth_db()
-        if db:
-            try:
-                user = db.get_user_by_id(session['user_id'])
-                
-                if not user or not user.get('is_active', True):
-                    return None
-                
-                # Return user data
-                user_data = {
-                    'user_id': user['user_id'],
-                    'email': user['email'],
-                    'name': user['full_name'] or user['username'],
-                    'created_at': user['join_date'].isoformat() if user['join_date'] else datetime.now().isoformat(),
-                    'last_login': user['last_login'].isoformat() if user['last_login'] else None,
-                    'profile_data': {
-                        'cultural_background': '',
-                        'profession': '',
-                        'location': ''
-                    },
-                    'is_active': user.get('is_active', True),
-                    'role': 'contributor'
-                }
-                
-                return user_data
-            except Exception as e:
-                print(f"MySQL session validation failed, falling back to JSON: {e}")
-        
-        # Fallback to JSON storage
-        users = load_users()
-        user_id = session['user_id']
-        if user_id not in users:
-            return None
-        
-        user = users[user_id]
-        if not user['is_active']:
-            return None
-        
-        return user
-        
+        # Format user data to match the expected structure
+        return {
+            'user_id': user['user_id'],
+            'email': user['email'],
+            'name': user['full_name'] or user['username'],
+            'created_at': user['created_at'],
+            'last_login': user['last_login'],
+            'profile_data': {
+                'cultural_background': user.get('cultural_background', ''),
+                'profession': user.get('profession', ''),
+                'location': user.get('location', '')
+            },
+            'is_active': user.get('is_active', True),
+            'role': user.get('role', 'contributor')
+        }
     except Exception as e:
+        print(f"Error validating session: {e}")
         return None
 
-def logout_user(session_token: str) -> bool:
-    """Logout user by removing session"""
+def logout_user_session(session_token: str) -> bool:
+    """Logout user by deactivating session using CSV storage"""
     try:
-        if 'sessions' in st.session_state and session_token in st.session_state.sessions:
-            del st.session_state.sessions[session_token]
-        return True
+        return logout_user(session_token)
     except Exception as e:
+        print(f"Error logging out user: {e}")
         return False
 
-def get_user_by_id(user_id) -> Optional[Dict]:
-    """Get user data by user ID"""
+def get_user_by_id_wrapper(user_id) -> Optional[Dict]:
+    """Get user data by user ID using CSV storage"""
     try:
-        db = get_auth_db()
-        if db:
-            try:
-                user = db.get_user_by_id(user_id)
-                
-                if not user:
-                    return None
-                
-                return {
-                    'user_id': user['user_id'],
-                    'email': user['email'],
-                    'name': user['full_name'] or user['username'],
-                    'created_at': user['join_date'].isoformat() if user['join_date'] else datetime.now().isoformat(),
-                    'last_login': user['last_login'].isoformat() if user['last_login'] else None,
-                    'profile_data': {
-                        'cultural_background': '',
-                        'profession': '',
-                        'location': ''
-                    },
-                    'is_active': user.get('is_active', True),
-                    'role': 'contributor'
-                }
-            except Exception as e:
-                print(f"MySQL user lookup failed, falling back to JSON: {e}")
+        user = get_user_by_id(user_id)
+        if not user:
+            return None
         
-        # Fallback to JSON storage
-        users = load_users()
-        return users.get(user_id)
+        return {
+            'user_id': user['user_id'],
+            'email': user['email'],
+            'name': user['full_name'] or user['username'],
+            'created_at': user['created_at'],
+            'last_login': user['last_login'],
+            'profile_data': {
+                'cultural_background': user.get('cultural_background', ''),
+                'profession': user.get('profession', ''),
+                'location': user.get('location', '')
+            },
+            'is_active': user.get('is_active', True),
+            'role': user.get('role', 'contributor')
+        }
         
     except Exception as e:
+        print(f"Error getting user by ID: {e}")
         return None
 
-def update_user_profile(user_id, profile_data: Dict) -> Tuple[bool, str]:
-    """Update user profile data"""
+def update_user_profile_wrapper(user_id, profile_data: Dict) -> Tuple[bool, str]:
+    """Update user profile data using CSV storage"""
     try:
-        db = get_auth_db()
-        if db:
-            try:
-                # Extract profile fields
-                updates = {}
-                if 'full_name' in profile_data:
-                    updates['full_name'] = profile_data['full_name']
-                if 'cultural_background' in profile_data or 'profession' in profile_data or 'location' in profile_data:
-                    bio_parts = []
-                    if profile_data.get('cultural_background'):
-                        bio_parts.append(f"Cultural Background: {profile_data['cultural_background']}")
-                    if profile_data.get('profession'):
-                        bio_parts.append(f"Profession: {profile_data['profession']}")
-                    if profile_data.get('location'):
-                        bio_parts.append(f"Location: {profile_data['location']}")
-                    updates['bio'] = ', '.join(bio_parts)
-                
-                if updates:
-                    success = db.update_user_profile(user_id, **updates)
-                    if success:
-                        return True, "Profile updated successfully"
-                    else:
-                        return False, "Failed to update profile"
-                else:
-                    return False, "No valid profile data provided"
-            except Exception as e:
-                print(f"MySQL profile update failed, falling back to JSON: {e}")
+        # Extract profile fields
+        updates = {}
+        if 'full_name' in profile_data:
+            updates['full_name'] = profile_data['full_name']
+        if 'cultural_background' in profile_data:
+            updates['cultural_background'] = profile_data['cultural_background']
+        if 'profession' in profile_data:
+            updates['profession'] = profile_data['profession']
+        if 'location' in profile_data:
+            updates['location'] = profile_data['location']
         
-        # Fallback to JSON storage
-        users = load_users()
-        
-        if user_id not in users:
-            return False, "User not found"
-        
-        users[user_id]['profile_data'].update(profile_data)
-        save_users(users)
-        
-        return True, "Profile updated successfully"
+        if updates:
+            success = update_user_profile(user_id, **updates)
+            if success:
+                return True, "Profile updated successfully"
+            else:
+                return False, "Failed to update profile"
+        else:
+            return False, "No valid profile data provided"
             
     except Exception as e:
         return False, f"Profile update error: {str(e)}"
 
 def change_password(user_id, current_password: str, new_password: str) -> Tuple[bool, str]:
-    """Change user password"""
+    """Change user password using CSV storage"""
     try:
-        db = get_auth_db()
-        if db:
-            try:
-                user = db.get_user_by_id(user_id)
-                
-                if not user:
-                    return False, "User not found"
-                
-                # Verify current password
-                if not verify_password(current_password, user['password_hash']):
-                    return False, "Current password is incorrect"
-                
-                # Validate new password
-                if len(new_password) < 8:
-                    return False, "New password must be at least 8 characters long"
-                
-                # Update password
-                new_password_hash = hash_password(new_password)
-                success = db.update_user_profile(user_id, password_hash=new_password_hash)
-                
-                if success:
-                    return True, "Password changed successfully"
-                else:
-                    return False, "Failed to change password"
-            except Exception as e:
-                print(f"MySQL password change failed, falling back to JSON: {e}")
+        user = get_user_by_id(user_id)
         
-        # Fallback to JSON storage
-        users = load_users()
-        
-        if user_id not in users:
+        if not user:
             return False, "User not found"
-        
-        user = users[user_id]
         
         # Verify current password
         if not verify_password(current_password, user['password_hash']):
@@ -448,93 +224,55 @@ def change_password(user_id, current_password: str, new_password: str) -> Tuple[
             return False, "New password must be at least 8 characters long"
         
         # Update password
-        user['password_hash'] = hash_password(new_password)
-        save_users(users)
+        new_password_hash = hash_password(new_password)
+        success = change_user_password(user_id, new_password_hash)
         
-        return True, "Password changed successfully"
+        if success:
+            return True, "Password changed successfully"
+        else:
+            return False, "Failed to change password"
             
     except Exception as e:
         return False, f"Password change error: {str(e)}"
 
 def delete_user_account(user_id, password: str) -> Tuple[bool, str]:
-    """Delete user account"""
+    """Delete user account using CSV storage"""
     try:
-        db = get_auth_db()
-        if db:
-            try:
-                user = db.get_user_by_id(user_id)
-                
-                if not user:
-                    return False, "User not found"
-                
-                # Verify password
-                if not verify_password(password, user['password_hash']):
-                    return False, "Password is incorrect"
-                
-                # Deactivate account
-                success = db.deactivate_user(user_id)
-                
-                if success:
-                    return True, "Account deactivated successfully"
-                else:
-                    return False, "Failed to deactivate account"
-            except Exception as e:
-                print(f"MySQL account deletion failed, falling back to JSON: {e}")
+        user = get_user_by_id(user_id)
         
-        # Fallback to JSON storage
-        users = load_users()
-        
-        if user_id not in users:
+        if not user:
             return False, "User not found"
-        
-        user = users[user_id]
         
         # Verify password
         if not verify_password(password, user['password_hash']):
             return False, "Password is incorrect"
         
-        # Deactivate account instead of deleting
-        user['is_active'] = False
-        user['deactivated_at'] = datetime.now().isoformat()
-        save_users(users)
+        # Deactivate account
+        success = deactivate_user(user_id)
         
-        # Remove all sessions for this user
-        sessions = load_sessions()
-        sessions_to_remove = [token for token, session in sessions.items() 
-                             if session['user_id'] == user_id]
-        
-        for token in sessions_to_remove:
-            del sessions[token]
-        save_sessions(sessions)
-        
-        return True, "Account deactivated successfully"
+        if success:
+            return True, "Account deactivated successfully"
+        else:
+            return False, "Failed to deactivate account"
             
     except Exception as e:
         return False, f"Account deletion error: {str(e)}"
 
-def get_user_statistics(user_id) -> Dict:
-    """Get user contribution statistics"""
+def get_user_statistics_wrapper(user_id) -> Dict:
+    """Get user contribution statistics using CSV storage"""
     try:
-        db = get_auth_db()
-        if db:
-            # This would need to be implemented based on your data structure
-            # For now, return basic structure
-            return {
-                'total_contributions': 0,
-                'images_uploaded': 0,
-                'audio_uploaded': 0,
-                'video_uploaded': 0,
-            }
+        return get_user_statistics(user_id)
     except Exception as e:
-        pass
-    
-    # Fallback to basic structure
-    return {
-        'total_contributions': 0,
-        'images_uploaded': 0,
-        'audio_uploaded': 0,
-        'video_uploaded': 0,
-    }
+        print(f"Error getting user statistics: {e}")
+        return {
+            'total_contributions': 0,
+            'media_types': {},
+            'languages': {},
+            'categories': {},
+            'last_contribution': None,
+            'account_created': None,
+            'last_login': None
+        }
 
 # Streamlit UI Components
 
@@ -561,7 +299,7 @@ def render_login_form():
             success, result = authenticate_user(email, password)
             if success:
                 user = result
-                session_token = create_session(user['user_id'])
+                session_token = create_user_session(user['user_id'])
                 st.session_state['user_session'] = session_token
                 st.session_state['user_data'] = user
                 st.success(f"Welcome back, {user['name']}!")
@@ -578,19 +316,8 @@ def render_signup_form():
     """Render signup form"""
     st.markdown("### 📝 Create Your Account")
     
-    # Show database status
-    db = get_auth_db()
-    if db:
-        st.success("✅ Connected to MySQL database")
-    else:
-        st.info("ℹ️ Using local JSON storage (MySQL not available)")
-        st.markdown("""
-        **To enable MySQL database storage:**
-        1. Install MySQL Server
-        2. Create database: `cultural_corpus_platform`
-        3. Update `db_config.py` with your MySQL credentials
-        4. Run: `python migrate_to_mysql.py`
-        """)
+    # Show storage status
+    st.success("✅ Using CSV-based storage system")
     
     with st.form("signup_form"):
         name = st.text_input("Full Name", placeholder="Enter your full name")
@@ -646,7 +373,7 @@ def render_signup_form():
                 'location': location
             }
             
-            success, result = create_user(email, password, name, profile_data)
+            success, result = register_user(email, password, name, profile_data)
             if success:
                 user_id = result
                 st.success("Account created successfully! You can now log in.")
@@ -688,17 +415,17 @@ def render_user_profile():
     
     # Statistics
     st.markdown("### 📊 Your Contributions")
-    stats = get_user_statistics(user['user_id'])
+    stats = get_user_statistics_wrapper(user['user_id'])
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Contributions", stats['total_contributions'])
     with col2:
-        st.metric("Images Uploaded", stats['images_uploaded'])
+        st.metric("Images Uploaded", stats.get('media_types', {}).get('image', 0))
     with col3:
-        st.metric("Audio Uploaded", stats['audio_uploaded'])
+        st.metric("Audio Uploaded", stats.get('media_types', {}).get('audio', 0))
     with col4:
-        st.metric("Video Uploaded", stats['video_uploaded'])
+        st.metric("Video Uploaded", stats.get('media_types', {}).get('video', 0))
     
     # Account actions
     st.markdown("### ⚙️ Account Settings")
@@ -752,7 +479,7 @@ def render_edit_profile_form(user):
                 'location': location
             }
             
-            success, message = update_user_profile(user['user_id'], profile_data)
+            success, message = update_user_profile_wrapper(user['user_id'], profile_data)
             if success:
                 # Update session state
                 user['name'] = new_name
@@ -798,7 +525,7 @@ def render_delete_account_form(user):
                 st.success(message)
                 # Clear session
                 if 'user_session' in st.session_state:
-                    logout_user(st.session_state['user_session'])
+                    logout_user_session(st.session_state['user_session'])
                 st.session_state.clear()
                 st.rerun()
             else:
@@ -810,7 +537,7 @@ def check_user_authentication():
     if not session_token:
         return None
     
-    user = validate_session(session_token)
+    user = validate_user_session(session_token)
     if user:
         st.session_state['user_data'] = user
         return user
