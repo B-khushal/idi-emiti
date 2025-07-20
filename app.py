@@ -33,7 +33,7 @@ from language_manager import (
     get_translated_placeholders,
     render_language_banner
 )
-from audio_recorder import audio_recorder_component, reset_audio_recorder
+from audio_recorder import audio_recorder_component, get_recorded_audio, has_recorded_audio, clear_recorded_audio, save_recorded_audio_to_file
 from config import (
     APP_TITLE, APP_ICON, APP_DESCRIPTION, ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_SESSION_KEY,
     ASSETS_FOLDER, DATA_FOLDER, CSV_FILE, UPLOADS_FOLDER, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS,
@@ -888,6 +888,8 @@ def cultural_corpus_page(user=None):
 
 def idi_emiti_page(user=None):
     """Idi-Emiti (What is this?) page - Cultural object identification game"""
+    import os  # Add missing import
+    
     # Require authentication
     if not user:
         st.error("🔐 Authentication Required")
@@ -960,6 +962,27 @@ def idi_emiti_page(user=None):
             st.markdown("---")
             st.markdown("### 🌍 Tell us what this is called in your language")
             
+            # Audio recording for pronunciation (outside form)
+            st.markdown("#### 🎤 Audio Pronunciation (Optional)")
+            st.markdown("Record yourself saying the name of this object in your local language.")
+            
+            # Use the audio recorder component
+            audio_recorder_component(key="idi_emiti")
+            
+            # File upload as fallback (outside form)
+            st.markdown("**Or upload an audio file:**")
+            audio_recording = st.file_uploader(
+                "🎵 Upload Audio Recording",
+                type=['mp3', 'wav', 'ogg', 'm4a'],
+                key="idi_emiti_audio_upload",
+                help="Record the pronunciation of the object name in your local language"
+            )
+            
+            # Store uploaded file in session state
+            if audio_recording is not None:
+                st.session_state['idi_emiti_audio_file'] = audio_recording
+                st.audio(audio_recording, caption="Your pronunciation recording")
+            
             with st.form("idi_emiti_form"):
                 col1, col2 = st.columns(2)
                 
@@ -1002,24 +1025,6 @@ def idi_emiti_page(user=None):
                         help="Share any additional cultural context or memories"
                     )
                 
-                # Audio recording for pronunciation
-                st.markdown("#### 🎤 Audio Pronunciation (Optional)")
-                st.markdown("Record yourself saying the name of this object in your local language.")
-                
-                # Web Audio Recording with reset trigger
-                audio_recorder_component(key="idi_emiti", reset_trigger=st.session_state.audio_reset_trigger)
-                
-                # File upload as fallback
-                st.markdown("**Or upload an audio file:**")
-                audio_recording = st.file_uploader(
-                    "🎵 Upload Audio Recording",
-                    type=['mp3', 'wav', 'ogg', 'm4a'],
-                    help="Record the pronunciation of the object name in your local language"
-                )
-                
-                if audio_recording:
-                    st.audio(audio_recording, caption="Your pronunciation recording")
-                
                 # Action buttons with reset/re-record features
                 st.markdown("---")
                 st.markdown("#### 🎮 Action Buttons")
@@ -1054,8 +1059,44 @@ def idi_emiti_page(user=None):
                         # Save audio recording if provided
                         audio_filename = None
                         audio_path = None
+                        
+                        # Get audio file from session state (uploaded outside form)
+                        audio_recording = st.session_state.get('idi_emiti_audio_file')
+                        
+                        # Check for uploaded audio file first (this is the main method now)
                         if audio_recording is not None:
-                            audio_filename, audio_path = save_uploaded_file(audio_recording, "audio")
+                            try:
+                                audio_filename, audio_path = save_uploaded_file(audio_recording, "audio")
+                                st.success("✅ Uploaded audio file saved successfully!")
+                                # Clear the session state after successful save
+                                del st.session_state['idi_emiti_audio_file']
+                            except Exception as e:
+                                st.error(f"❌ Error saving uploaded audio: {str(e)}")
+                        
+                        # Check for recorded audio data (fallback method)
+                        elif st.session_state.get(f"audio_data_idi_emiti"):
+                            recorded_audio_data = st.session_state.get(f"audio_data_idi_emiti")
+                            
+                            if recorded_audio_data and recorded_audio_data.strip():
+                                # Save recorded audio to file
+                                import os
+                                from datetime import datetime
+                                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                                recorded_filename = f"pronunciation_idi_emiti_{timestamp}.wav"
+                                recorded_path = os.path.join("uploads", "audio", recorded_filename)
+                                
+                                # Ensure uploads/audio directory exists
+                                os.makedirs(os.path.join("uploads", "audio"), exist_ok=True)
+                                
+                                # Save the recorded audio
+                                if save_recorded_audio_to_file(recorded_audio_data, recorded_path):
+                                    audio_filename = recorded_filename
+                                    audio_path = recorded_path
+                                    st.success("✅ Recorded audio saved successfully!")
+                                else:
+                                    st.error("❌ Failed to save recorded audio")
+                        else:
+                            st.info("ℹ️ No audio file uploaded. You can record audio using the recorder above and upload the downloaded file.")
                         
                         # Save identification to CSV storage
                         save_user_response(
@@ -1080,13 +1121,9 @@ def idi_emiti_page(user=None):
                             local_language_audio_path=audio_path
                         )
                         
-                        # Success message
-                        st.success("🎉 Thank you for your contribution!")
-                        st.info("Your identification helps preserve cultural vocabulary and linguistic diversity.")
-                        
-                        # Show next object option
-                        if st.button("🔄 Show Another Object"):
-                            st.rerun()
+                        # Set success flag in session state
+                        st.session_state.identification_success = True
+                        st.rerun()
                         
                     except Exception as e:
                         st.error(f"Error saving identification: {str(e)}")
@@ -1098,18 +1135,25 @@ def idi_emiti_page(user=None):
                     # The form will be cleared on the next render
                 
                 elif rerecord_button:
-                    # Increment reset trigger to force audio recorder reset
-                    st.session_state.audio_reset_trigger += 1
+                    # Clear recorded audio using the new function
+                    clear_recorded_audio("idi_emiti")
                     st.success("🎤 Audio recording cleared! You can record again.")
                     st.info("Please use the audio recorder above to record a new pronunciation.")
-                    # Inject reset script
-                    st.markdown(reset_audio_recorder("idi_emiti"), unsafe_allow_html=True)
                     st.rerun()
                 
                 elif new_object_button:
                     # Show new object
                     st.success("🆕 Loading a new cultural object...")
                     st.rerun()
+        
+        # Handle success message and next object button (outside form context)
+        if st.session_state.get('identification_success', False):
+            st.success("🎉 Thank you for your contribution!")
+            st.info("Your identification helps preserve cultural vocabulary and linguistic diversity.")
+            st.markdown("---")
+            if st.button("🔄 Show Another Object", key="show_another_after_submit"):
+                st.session_state.identification_success = False
+                st.rerun()
         
         else:
             st.warning("No cultural object images found in the assets folder.")
@@ -1660,10 +1704,14 @@ def admin_panel_page():
             st.session_state.generate_report = True
     
     with col2:
-        if st.button("🗑️ Clear All Data"):
-            if st.button("⚠️ Confirm Clear"):
+        if st.button("🗑️ Clear All Data", key="clear_data"):
+            st.session_state.show_confirm_clear = True
+        
+        if st.session_state.get('show_confirm_clear', False):
+            if st.button("⚠️ Confirm Clear", key="confirm_clear"):
                 # Clear data logic would go here
                 st.warning("Data clearing functionality would be implemented here")
+                st.session_state.show_confirm_clear = False
         
         if st.button("🚪 Logout"):
             st.session_state[ADMIN_SESSION_KEY] = False

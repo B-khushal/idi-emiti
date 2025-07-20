@@ -753,34 +753,101 @@ def display_storage_status():
     """Display storage status in the app"""
     try:
         from language_manager import get_text
-        status = get_storage_status()
         
-        if status['mode'] == 'mysql':
-            st.success(f"{status['icon']} {get_text('connected_to_mysql')}")
-        else:
-            st.info(f"{status['icon']} {get_text('using_local_storage')}")
+        # Show CSV storage status
+        st.success("✅ Connected to CSV Storage System")
+        
+        # Show uploaded files count
+        file_counts = get_uploaded_files_count()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("📁 Total Files", file_counts['total'])
+        with col2:
+            st.metric("🖼️ Images", file_counts['images'])
+        with col3:
+            st.metric("🎵 Audio", file_counts['audio'])
+        with col4:
+            st.metric("🎬 Video", file_counts['video'])
+        
+        # Show storage info
+        with st.expander("📊 Storage Information"):
+            st.markdown("""
+            **File Storage Structure:**
+            - Images: `uploads/images/`
+            - Audio: `uploads/audio/`
+            - Video: `uploads/video/`
             
-            # Show MySQL setup instructions for local development
-            if not os.getenv('STREAMLIT_SERVER_PORT'):  # Not on Streamlit Cloud
-                with st.expander(f"💡 {get_text('mysql_setup_guide')}"):
-                    st.markdown(get_text('mysql_setup_instructions'))
-    except ImportError:
-        # Fallback if language manager not available
-        status = get_storage_status()
-        if status['mode'] == 'mysql':
-            st.success(f"{status['icon']} {status['status']}")
-        else:
-            st.info(f"{status['icon']} {status['status']}")
+            **Data Storage:**
+            - User data: `data/users.csv`
+            - Session data: `data/sessions.csv`
+            - User responses: `data/user_responses.csv`
+            """)
             
-            if not os.getenv('STREAMLIT_SERVER_PORT'):
-                with st.expander("💡 Want to use MySQL database?"):
-                    st.markdown("""
-                    **To enable MySQL database storage:**
-                    
-                    1. **Install MySQL Server** on your local machine
-                    2. **Create database:** `cultural_corpus_platform`
-                    3. **Update credentials** in `db_config.py`
-                    4. **Run migration:** `python migrate_to_mysql.py`
-                    
-                    The app will automatically detect and use MySQL when available.
-                    """) 
+    except Exception as e:
+        # Fallback display
+        st.info("📁 Using CSV-based storage system")
+        
+        # Show uploaded files count
+        file_counts = get_uploaded_files_count()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("📁 Total Files", file_counts['total'])
+        with col2:
+            st.metric("🖼️ Images", file_counts['images'])
+        with col3:
+            st.metric("🎵 Audio", file_counts['audio'])
+        with col4:
+            st.metric("🎬 Video", file_counts['video']) 
+
+def get_uploaded_files(media_type=None):
+    """Get list of uploaded files from uploads directory"""
+    ensure_directories()
+    
+    uploaded_files = []
+    
+    if media_type:
+        # Get files from specific media type directory
+        upload_dir = os.path.join(UPLOADS_FOLDER, media_type)
+        if os.path.exists(upload_dir):
+            for file in os.listdir(upload_dir):
+                if file.endswith(MEDIA_EXTENSIONS):
+                    file_path = os.path.join(upload_dir, file)
+                    uploaded_files.append({
+                        'filename': file,
+                        'path': file_path,
+                        'type': get_media_type(file),
+                        'size': os.path.getsize(file_path)
+                    })
+    else:
+        # Get files from all media type directories
+        for media_dir in ['images', 'audio', 'video']:
+            upload_dir = os.path.join(UPLOADS_FOLDER, media_dir)
+            if os.path.exists(upload_dir):
+                for file in os.listdir(upload_dir):
+                    if file.endswith(MEDIA_EXTENSIONS):
+                        file_path = os.path.join(upload_dir, file)
+                        uploaded_files.append({
+                            'filename': file,
+                            'path': file_path,
+                            'type': get_media_type(file),
+                            'size': os.path.getsize(file_path)
+                        })
+    
+    return uploaded_files
+
+def get_uploaded_files_count():
+    """Get count of uploaded files by type"""
+    ensure_directories()
+    
+    counts = {'images': 0, 'audio': 0, 'video': 0, 'total': 0}
+    
+    for media_dir in ['images', 'audio', 'video']:
+        upload_dir = os.path.join(UPLOADS_FOLDER, media_dir)
+        if os.path.exists(upload_dir):
+            count = len([f for f in os.listdir(upload_dir) if f.endswith(MEDIA_EXTENSIONS)])
+            counts[media_dir] = count
+            counts['total'] += count
+    
+    return counts 
