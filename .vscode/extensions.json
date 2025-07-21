@@ -1,0 +1,88 @@
+{
+    "recommendations": [
+        // Python Development
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.isort",
+        "ms-python.pylint",
+        "ms-python.pytest-adapter",
+        "ms-python.debugpy",
+        // Streamlit Specific
+        "streamlit.streamlit",
+        "ms-python.streamlit",
+        // Data Science & Analytics
+        "ms-python.pandas-profiler",
+        "ms-python.jupyter",
+        "ms-python.jupyter-keymap",
+        "ms-python.jupyter-renderers",
+        "ms-toolsai.jupyter",
+        // Web Development
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-json",
+        // Markdown & Documentation
+        "yzhang.markdown-all-in-one",
+        "shd101wyy.markdown-preview-enhanced",
+        "DavidAnson.vscode-markdownlint",
+        "bierner.markdown-mermaid",
+        "bierner.markdown-preview-github-styles",
+        // Git & Version Control
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "GitHub.vscode-pull-request-github",
+        // File Management
+        "ms-vscode.vscode-explorer-exclude",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.vscode-json",
+        // Productivity
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-csv",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        // Code Quality
+        "streetsidesoftware.code-spell-checker",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        // Themes & Icons
+        "PKief.material-icon-theme",
+        "zhuangtongfa.Material-theme",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        // Utilities
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        // Database & CSV
+        "janisdd.vscode-edit-csv",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        // Testing
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        // Docker (if needed)
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.vscode-json",
+        // Remote Development
+        "ms-vscode-remote.vscode-remote-extensionpack",
+        "ms-vscode.vscode-json",
+        // Accessibility
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json",
+        // Performance
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-json"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.vscode-typescript",
+        "ms-vscode.vscode-json"
+    ]
+}

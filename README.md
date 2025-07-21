@@ -121,18 +121,14 @@ cultural-corpus-platform/
 ├── admin_dashboard.py    # Admin analytics dashboard
 ├── requirements.txt      # Python dependencies
 ├── README.md            # This file
-├── SETUP_GUIDE.md       # Detailed setup instructions
-├── CSV_MIGRATION_SUMMARY.md # CSV migration documentation
-├── SYSTEM_OVERVIEW.md   # Technical architecture
-├── PROJECT_ROADMAP.md   # Development roadmap
-├── test_auth.py         # Authentication system tests
-├── test_multimodal.py   # Core functionality tests
-├── test_csv_system.py   # CSV system tests
-├── assets/              # Sample media files
+├── CONTRIBUTING.md      # Contribution guidelines
+├── CHANGELOG.md         # Version history
+├── LICENSE              # Project license
 ├── data/                # Data storage (CSV files)
 │   ├── users.csv        # User accounts and profiles
 │   ├── sessions.csv     # Active user sessions
 │   └── user_responses.csv # Cultural data submissions
+├── assets/              # Sample media files
 ├── uploads/             # User uploaded files
 │   ├── images/          # Image uploads
 │   ├── audio/           # Audio uploads
@@ -212,8 +208,8 @@ validation_status,curator_notes
 3. Modify `app.py` for UI changes
 4. Update analytics in `admin_dashboard.py`
 
-### Database Schema Changes
-1. Update `DATABASE_SCHEMA` in `config.py`
+### CSV Schema Changes
+1. Update CSV file structures in `csv_user_manager.py`
 2. Modify `save_user_response()` in `utils.py`
 3. Update analytics functions for new fields
 
@@ -265,9 +261,8 @@ This platform serves as a vital tool for:
 
 ### Local Deployment
 1. **Install Dependencies**: `pip install -r requirements.txt`
-2. **Configure Database**: Set up MySQL or use local storage
-3. **Run Application**: `streamlit run app.py`
-4. **Access Platform**: Open browser to localhost:8501
+2. **Run Application**: `streamlit run app.py`
+3. **Access Platform**: Open browser to localhost:8501
 
 ## 🤝 Contributing
 
